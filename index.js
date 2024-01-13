@@ -78,6 +78,38 @@ async function getemiRecords(url, headers, sheetId,criteria) {
     return response.data.data;
   }
 
+app.get('/tyreloans',async (req,res)=>{
+    try{
+        const url = process.env.TIGERSHEET_API_URL;
+        const headers = {
+        'Authorization': process.env.TIGERSHEET_AUTHORIZATION_TOKEN,
+        'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
+        };
+        const sheetId = process.env.TIGERSHEET_TYRELOANS_SHEET_ID
+        ;
+        // Get criteria from request query parameters
+        const criteria = req.query.criteria || '';;
+        const cdloansRecords = await gettyreloansRecords(url, headers, sheetId,criteria);
+        res.send({data:cdloansRecords})
+
+    }catch(err){
+        console.error('Error in fetching data:', err.message);
+        res.status(500).send('Internal Server Error');
+    }
+})
+
+async function gettyreloansRecords(url, headers, sheetId,criteria) {
+    const payload = {
+      'sheet_id': sheetId,
+      'criteria': criteria,
+    };
+  
+    const response = await axios.post(url, payload, { headers });
+    console.log('All Records from Tigersheet Backend', response.data);
+  
+    return response.data.data;
+}
+
 app.listen(Port,()=>{
     console.log(`Server is running on ${Port}`);
 });
