@@ -112,6 +112,69 @@ async function gettyreloansRecords(url, headers, sheetId,criteria) {
     return response.data.data;
 }
 
+app.get('/customer',async (req,res)=>{
+    try{
+        const url = process.env.TIGERSHEET_API_URL;
+        const headers = {
+        'Authorization': process.env.TIGERSHEET_AUTHORIZATION_TOKEN,
+        'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
+        };
+        const sheetId = process.env.TIGERSHEET_CUSTOMER_SHEET_ID;
+        // Get criteria from request query parameters
+        const criteria = req.query.criteria || '';;
+        const cdloansRecords = await getcustomerRecords(url, headers, sheetId,criteria);
+        res.send({data:cdloansRecords})
+
+    }catch(err){
+        console.error('Error in fetching data:', err.message);
+        res.status(500).send('Internal Server Error');
+    }
+})
+
+async function getcustomerRecords(url, headers, sheetId,criteria) {
+    const payload = {
+      'sheet_id': sheetId,
+      'criteria': criteria,
+    //   'sort':JSON.stringify([{"property":"column_85","direction":"desc"}])
+    };
+    const response = await axios.post(url, payload, { headers });
+    console.log('All Records from Tigersheet Backend', response.data);
+  
+    return response.data.data;
+}
+
+app.post("/tyre",async (req,res)=>{
+    try{
+        const url=process.env.TIGERSHEET_API_CREATE_URL;
+        const headers={
+            'Authorization':process.env.TIGERSHEET_AUTHORIZATION_TOKEN1,
+            'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
+        }
+        const sheetId = process.env.TIGERSHEET_TYRE_LOAN_SHEET_ID;
+        // Extract data from the request body
+        const { numberOfTires, selectedBrand, loanAmount } = req.body;
+        const data = JSON.stringify({"30541":{"value":numberOfTires },"30542":{"value":selectedBrand},"30543":{"value":loanAmount }});
+        const tyreData= await getTyreData(url,headers,sheetId,data);
+
+        res.send({data:tyreData})
+        
+    }catch(err){
+        console.error('Error in fetching data:', err.message);
+        res.status(500).send('Internal Server Error');
+    }
+});
+
+async function getTyreData(url,headers,sheetId,data){
+    const payload={
+        'sheet_id':sheetId,
+        'data':data
+    }
+    const response = await axios.post(url, payload, { headers });
+    console.log('All Records from Tigersheet Backend', response.data);
+  
+    return response.data.data;
+}
+
 app.listen(Port,()=>{
     console.log(`Server is running on ${Port}`);
 });
