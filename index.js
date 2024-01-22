@@ -152,8 +152,8 @@ app.post("/tyre",async (req,res)=>{
         }
         const sheetId = process.env.TIGERSHEET_TYRE_LOAN_SHEET_ID;
         // Extract data from the request body
-        const { numberOfTires, selectedBrand, loanAmount } = req.body;
-        const data = JSON.stringify({"30541":{"value":numberOfTires },"30542":{"value":selectedBrand},"30543":{"value":loanAmount }});
+        const { numberOfTires, selectedBrand, loanAmount,mobilenumber,FullName, PanNumber, AlternateMobileNumber } = req.body;
+        const data = JSON.stringify({"30541":{"value":numberOfTires },"30542":{"value":selectedBrand},"30543":{"value":loanAmount },"31495":{"value":mobilenumber},"31820":{"value":FullName},"31821":{"value":PanNumber},"31822":{"value":AlternateMobileNumber}});
         const tyreData= await getTyreData(url,headers,sheetId,data);
 
         res.send({data:tyreData})
