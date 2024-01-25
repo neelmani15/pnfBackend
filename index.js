@@ -165,7 +165,8 @@ app.post("/tyre",async (req,res)=>{
             houseType,
             truckNumber,
             source,
-            date 
+            date,
+            NoOfTrucks
         } = req.body;
 
         const data = JSON.stringify({
@@ -181,9 +182,27 @@ app.post("/tyre",async (req,res)=>{
             "31856":{"value":houseType},
             "31857":{"value":truckNumber},
             "31858":{"value":date},
-            "31859":{"value":source}
+            "31859":{"value":source},
+            "32063":{"value":NoOfTrucks}
         });
-        
+
+        // const data = JSON.stringify({
+        //     "806":{"value":numberOfTires },
+        //     // "30542":{"value":selectedBrand},
+        //     "805":{"value":loanAmount },
+        //     "793":{"value":mobilenumber},
+        //     "791":{"value":FullName},
+        //     "792":{"value":PanNumber},
+        //     "794":{"value":AlternateMobileNumber},
+        //     "800":{"value":martialStatus},
+        //     "801":{"value":numchildren},
+        //     "802":{"value":houseType},
+        //     "803":{"value":truckNumber},
+        //     "790":{"value":date},
+        //     "807":{"value":source},
+        //     "795":{"value":NoOfTrucks}
+        // });
+
         const tyreData= await getTyreData(url,headers,sheetId,data);
 
         res.send({data:tyreData})
