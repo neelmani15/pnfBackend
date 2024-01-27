@@ -48,7 +48,7 @@ async function getcdloansRecords(url, headers, sheetId,criteria) {
   
     const response = await axios.post(url, payload, { headers });
     console.log('All Records from Tigersheet Backend', response.data);
-  
+      
     return response.data.data;
   }
 
@@ -65,7 +65,8 @@ app.get('/emi',async (req,res)=>{
         const emiRecords = await getemiRecords(url, headers, sheetId,criteria);
         res.send({data:emiRecords})
 
-    }catch(err){
+    }
+    catch(err){
         console.error('Error in fetching data:', err.message);
         res.status(500).send('Internal Server Error');
     }
