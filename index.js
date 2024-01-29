@@ -48,7 +48,7 @@ async function getcdloansRecords(url, headers, sheetId,criteria) {
   
     const response = await axios.post(url, payload, { headers });
     console.log('All Records from Tigersheet Backend', response.data);
-      
+
     return response.data.data;
   }
 
@@ -203,7 +203,8 @@ app.post("/tyre",async (req,res)=>{
             source,
             date,
             NoOfTrucks,
-            cnfPanNumber
+            cnfPanNumber,
+            driverSalary
         } = req.body;
 
         // const data = JSON.stringify({
@@ -239,7 +240,8 @@ app.post("/tyre",async (req,res)=>{
             "802":{"value":houseType},
             "803":{"value":truckNumber},
             "855":{"value":selectedBrand},
-            "810":{"value":cnfPanNumber}
+            "810":{"value":cnfPanNumber},
+            "804":{"value":driverSalary}
         });
 
         const tyreData= await getTyreData(url,headers,sheetId,data);
@@ -262,7 +264,6 @@ async function getTyreData(url,headers,sheetId,data){
   
     return response.data.data;
 }
-
 
 
 app.listen(Port,()=>{
