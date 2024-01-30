@@ -207,6 +207,14 @@ app.post("/tyre",async (req,res)=>{
             driverSalary
         } = req.body;
 
+        const sourceValue = source ? source : 'null';
+        // const sourceValue = "ASHPAK"
+
+
+
+        console.log("Source",source);
+        console.log("Source Value",sourceValue);
+
         // const data = JSON.stringify({
         //     "30541":{"value":numberOfTires },
         //     "30542":{"value":selectedBrand},
@@ -225,11 +233,18 @@ app.post("/tyre",async (req,res)=>{
         //     "32122":{"value":cnfPanNumber}
         // });
 
+        const sourceJsonValue = JSON.stringify({
+            "reference_column_id": 236,
+            "value": sourceValue
+        });
+
         const data = JSON.stringify({
             "791":{"value":FullName},
             "790":{"value":date},
-            "805":{"value":loanAmount },
-            // "807":{"value":source},
+            "805":{"value":loanAmount },            
+            "807":{"value":sourceJsonValue},
+            // "807":{"value":"{\"reference_column_id\":236,\"value\":\"PARMANAND\"}"},
+            // "807": {"value": `{"reference_column_id":236,"value":"${source}"}`},
             "806":{"value":numberOfTires },
             "792":{"value":PanNumber},
             "793":{"value":mobilenumber},
@@ -243,6 +258,8 @@ app.post("/tyre",async (req,res)=>{
             "810":{"value":cnfPanNumber},
             "804":{"value":driverSalary}
         });
+
+        // console.log('Source:', source);
 
         const tyreData= await getTyreData(url,headers,sheetId,data);
 
