@@ -207,13 +207,19 @@ app.post("/tyre",async (req,res)=>{
             driverSalary
         } = req.body;
 
-        const sourceValue = source ? source : 'null';
+        // const sourceValue = source ? source : 'null';
         // const sourceValue = "ASHPAK"
 
+        // const sourceJsonValue = source
+        //     ? JSON.stringify({
+        //         "reference_column_id": 236,
+        //         "value": source
+        //     })
+        //     : JSON.stringify({});
 
 
-        console.log("Source",source);
-        console.log("Source Value",sourceValue);
+        // console.log("Source",source);
+        // console.log("Source Value",sourceValue);
 
         // const data = JSON.stringify({
         //     "30541":{"value":numberOfTires },
@@ -233,16 +239,16 @@ app.post("/tyre",async (req,res)=>{
         //     "32122":{"value":cnfPanNumber}
         // });
 
-        const sourceJsonValue = JSON.stringify({
-            "reference_column_id": 236,
-            "value": sourceValue
-        });
+        // const sourceJsonValue = JSON.stringify({
+        //     "reference_column_id": 236,
+        //     "value": sourceValue
+        // });
 
-        const data = JSON.stringify({
+        const dataField = {
             "791":{"value":FullName},
             "790":{"value":date},
             "805":{"value":loanAmount },            
-            "807":{"value":sourceJsonValue},
+            // "807":sourceJsonValue,
             // "807":{"value":"{\"reference_column_id\":236,\"value\":\"PARMANAND\"}"},
             // "807": {"value": `{"reference_column_id":236,"value":"${source}"}`},
             "806":{"value":numberOfTires },
@@ -257,7 +263,39 @@ app.post("/tyre",async (req,res)=>{
             "855":{"value":selectedBrand},
             "810":{"value":cnfPanNumber},
             "804":{"value":driverSalary}
-        });
+        };
+
+        if (source !== null) {
+            dataField["807"] = {"value": JSON.stringify({
+                "reference_column_id": 236,
+                "value": source
+            })};
+        } else {
+            dataField["807"] = {"value": null};
+        }
+
+        const data = JSON.stringify(dataField);
+
+        // const data = JSON.stringify({
+        //     "791":{"value":FullName},
+        //     "790":{"value":date},
+        //     "805":{"value":loanAmount },            
+        //     "807":sourceJsonValue,
+        //     // "807":{"value":"{\"reference_column_id\":236,\"value\":\"PARMANAND\"}"},
+        //     // "807": {"value": `{"reference_column_id":236,"value":"${source}"}`},
+        //     "806":{"value":numberOfTires },
+        //     "792":{"value":PanNumber},
+        //     "793":{"value":mobilenumber},
+        //     "794":{"value":AlternateMobileNumber},
+        //     "795":{"value":NoOfTrucks},
+        //     "800":{"value":martialStatus},
+        //     "801":{"value":numchildren},
+        //     "802":{"value":houseType},
+        //     "803":{"value":truckNumber},
+        //     "855":{"value":selectedBrand},
+        //     "810":{"value":cnfPanNumber},
+        //     "804":{"value":driverSalary}
+        // });
 
         // console.log('Source:', source);
 
