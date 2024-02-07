@@ -110,7 +110,7 @@ app.get('/tyreloans',async (req,res)=>{
 app.post('/receiveToken',async (req, res) => {
     const { notificationData } = req.body;
     console.log("Notification Data",notificationData);
-    cron.schedule('*/2 * * * *',async()=>{
+    cron.schedule('50 12 * * *',async()=>{
         await sendNotification(notificationData);
     })
     res.send('Send Notification successfully');
