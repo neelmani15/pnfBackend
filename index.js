@@ -113,7 +113,7 @@ app.post('/receiveToken',async (req, res) => {
     cron.schedule('0-59 * * * *',async()=>{
         await sendNotification(notificationData);
     })
-    res.send('Send Notification successfully',{notificationData});
+    res.send('Send Notification successfully',notificationData);
 });
 
 const sendNotification=async (notificationData) => {
