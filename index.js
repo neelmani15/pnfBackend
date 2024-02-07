@@ -3,15 +3,17 @@ const axios = require('axios');
 const cors = require('cors');
 const dotenv = require('dotenv');
 const _ = require('lodash');
+const bodyParser = require('body-parser');
+const cron = require('node-cron');
 
-
-dotenv.config(); 
+dotenv.config();
 
 const app = express();
 const customerRouter = express.Router();
 const Port = process.env.PORT || 5000;
+let UsermobileNumber=null
 
-app.use(express.json());
+app.use(bodyParser.json());
 app.use(cors());
 
 app.get('/', (req, res) => {
@@ -27,6 +29,7 @@ app.get('/cdloans',async (req,res)=>{
         'Authorization': process.env.TIGERSHEET_AUTHORIZATION_TOKEN,
         'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
         };
+        // console.log(req)
         const sheetId = process.env.TIGERSHEET_CDLOANS_SHEET_ID;
         // Get criteria from request query parameters
         const criteria = req.query.criteria || '';;
@@ -47,7 +50,7 @@ async function getcdloansRecords(url, headers, sheetId,criteria) {
     };
   
     const response = await axios.post(url, payload, { headers });
-    console.log('All Records from Tigersheet Backend', response.data);
+    // console.log('All Records from Tigersheet Backend', response.data);
 
     return response.data.data;
   }
@@ -62,9 +65,9 @@ app.get('/emi',async (req,res)=>{
         const sheetId = process.env.TIGERSHEET_EMI_SHEET_ID;
         // Get criteria from request query parameters
         const criteria = req.query.criteria || '';
+        
         const emiRecords = await getemiRecords(url, headers, sheetId,criteria);
         res.send({data:emiRecords})
-
     }
     catch(err){
         console.error('Error in fetching data:', err.message);
@@ -79,10 +82,11 @@ async function getemiRecords(url, headers, sheetId,criteria) {
     };
   
     const response = await axios.post(url, payload, { headers });
-    console.log('All Records from Tigersheet Backend', response.data);
+    // console.log('All Records from Tigersheet Backend', response.data);
   
     return response.data.data;
   }
+
 
 app.get('/tyreloans',async (req,res)=>{
     try{
@@ -91,18 +95,58 @@ app.get('/tyreloans',async (req,res)=>{
         'Authorization': process.env.TIGERSHEET_AUTHORIZATION_TOKEN,
         'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
         };
-        const sheetId = process.env.TIGERSHEET_TYRELOANS_SHEET_ID
-        ;
+        const sheetId = process.env.TIGERSHEET_TYRELOANS_SHEET_ID;
         // Get criteria from request query parameters
         const criteria = req.query.criteria || '';;
+        // console.log(req);
         const cdloansRecords = await gettyreloansRecords(url, headers, sheetId,criteria);
         res.send({data:cdloansRecords})
-
     }catch(err){
         console.error('Error in fetching data:', err.message);
         res.status(500).send('Internal Server Error');
     }
-})
+});
+
+app.post('/receiveToken',async (req, res) => {
+    const { notificationData } = req.body;
+    console.log("Notification Data",notificationData);
+    cron.schedule('*/2 * * * *',async()=>{
+        await sendNotification(notificationData);
+    })
+    res.send('Send Notification successfully');
+  });
+
+
+const sendNotification=async (notificationData) => {
+    try {
+        const fcmUrl = process.env.FCM_URL;
+        const fcmServerKey = process.env.FCM_SERVER_KEY; 
+        
+        // const notificationData = {
+        //     "to": "ekSiho_dS1yJch3Odt3Dd_:APA91bH6wuj_LipfDk2pvB_CVN4zpnRqjZyzLzjrY6s6U-qz7HgYx5QXlLoKJoEBa06MNS_QO_rzmcFBYKIB6UbG1u22EgLJVMtK8Ts0x2h-5PeAcqdOr2oRmrQIaTM2pJec1PczrlFR",
+        //     "notification": {
+        //         "body": "This is an FCM notification message!",
+        //         "title": "Upcoming EMI Status"
+        //     },
+        //     "data": {
+        //         "data_new": "Test Data"
+        //     }
+        // }
+        
+        
+        const response = await axios.post(fcmUrl, notificationData, {
+            headers: {
+                'Authorization': `Bearer ${process.env.FCM_SERVER_KEY}`,
+                'Content-Type': 'application/json',
+            },
+        });
+        
+        // res.send({ success: true, response: response.data });
+    } catch (err) {
+        console.error('Error sending FCM notification:', err.message);
+        // res.status(500).send('Internal Server Error');
+    }
+};
 
 async function gettyreloansRecords(url, headers, sheetId,criteria) {
     const payload = {
@@ -112,7 +156,7 @@ async function gettyreloansRecords(url, headers, sheetId,criteria) {
     };
   
     const response = await axios.post(url, payload, { headers });
-    console.log('All Records from Tigersheet Backend', response.data);
+    // console.log('All Records from Tigersheet Backend', response.data);
   
     return response.data.data;
 }
@@ -143,7 +187,7 @@ async function getcustomerRecords(url, headers, sheetId,criteria) {
     //   'sort':JSON.stringify([{"property":"column_85","direction":"desc"}])
     };
     const response = await axios.post(url, payload, { headers });
-    console.log('All Records from Tigersheet Backend', response.data);
+    // console.log('All Records from Tigersheet Backend', response.data);
   
     return response.data.data;
 }
@@ -174,7 +218,7 @@ async function gettruckRecords(url, headers, sheetId,criteria) {
     //   'sort':JSON.stringify([{"property":"column_85","direction":"desc"}])
     };
     const response = await axios.post(url, payload, { headers });
-    console.log('All Records from Tigersheet Backend', response.data);
+    // console.log('All Records from Tigersheet Backend', response.data);
   
     return response.data.data;
 }
@@ -315,11 +359,71 @@ async function getTyreData(url,headers,sheetId,data){
         'data':data
     }
     const response = await axios.post(url, payload, { headers });
-    console.log('All Records from Tigersheet Backend', response.data);
+    // console.log('All Records from Tigersheet Backend', response.data);
   
     return response.data.data;
 }
 
+app.get('/customerKyc', async (req, res) => {
+    try {
+        const url = process.env.TIGERSHEET_API_URL;
+        const headers = {
+            'Authorization': process.env.TIGERSHEET_AUTHORIZATION_TOKEN,
+            'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
+        };
+        const sheetId = process.env.TIGERSHEET_CUSTOMER_KYC_SHEET_ID;
+        // Get criteria from request query parameters
+        const criteria = req.query.criteria || '';
+        const customerKycRecords = await getCustomerKycRecords(url, headers, sheetId, criteria);
+        res.send({ data: customerKycRecords });
+    } catch (err) {
+        console.error('Error in fetching customerKyc data:', err.message);
+        res.status(500).send('Internal Server Error');
+    }
+  });
+  
+async function getCustomerKycRecords(url, headers, sheetId, criteria) {
+    const payload = {
+        'sheet_id': sheetId,
+        'criteria': criteria,
+    };
+  
+    const response = await axios.post(url, payload, { headers });
+    console.log('All Records from Tigersheet Backend', response.data);
+  
+    return response.data.data;
+  }
+
+app.get('/vehicles', async (req, res) => {
+    try {
+      const url = process.env.TIGERSHEET_API_URL;
+      const headers = {
+        'Authorization': process.env.TIGERSHEET_AUTHORIZATION_TOKEN,
+        'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
+      };
+      const sheetId = process.env.TIGERSHEET_VEHICLE_SHEET_ID;
+      const criteria = req.query.criteria || '';
+  
+      const vehicleRecords = await getVehicleRecords(url, headers, sheetId, criteria);
+      res.send({ data: vehicleRecords });
+  
+    } catch (err) {
+      console.error('Error in fetching data:', err.message);
+      res.status(500).send('Internal Server Error');
+    }
+  });
+  
+async function getVehicleRecords(url, headers, sheetId, criteria) {
+    const payload = {
+      'sheet_id': sheetId,
+      'criteria': criteria,
+    };
+  
+    const response = await axios.post(url, payload, { headers });
+    console.log('All Records from Tigersheet Backend for Vehicles', response.data);
+  
+    return response.data.data;
+}
 
 app.listen(Port,()=>{
     console.log(`Server is running on ${Port}`);
