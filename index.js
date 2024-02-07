@@ -115,17 +115,17 @@ app.get('/tyreloans',async (req,res)=>{
 });
 
 app.post('/receiveToken',async (req, res) => {
-    const { notificationData,token } = req.body;
-    // console.log(token);
+    const { tokens } = req.body;
+    console.log(tokens);
     const message={
         notification:{
-            title:JSON.stringify(notificationData.notification.title),
-            body:JSON.stringify(notificationData.notification.body)
+            title:"Data Add",
+            body:"Demo Data"
         },
-        token:token
+        token:req.body.tokens
     }
     
-    admin.messaging().send(message).then(res=>{
+    await admin.messaging().sendMulticast(message).then(res=>{
         console.log("Send Success");
     }).catch(err=>{
         console.log(err);
