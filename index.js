@@ -5,6 +5,8 @@ const dotenv = require('dotenv');
 const _ = require('lodash');
 const bodyParser = require('body-parser');
 const cron = require('node-cron');
+const admin = require('firebase-admin');
+var serviceAccount = require("./pnffrontend-firebase-adminsdk-wbif2-daf8b85b61.json");
 
 dotenv.config();
 
@@ -15,6 +17,12 @@ let UsermobileNumber=null
 
 app.use(bodyParser.json());
 app.use(cors());
+
+
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount)
+});
+
 
 app.get('/', (req, res) => {
     res.send('Hello, welcome to PNF Loan Backend!');
@@ -87,7 +95,6 @@ async function getemiRecords(url, headers, sheetId,criteria) {
     return response.data.data;
   }
 
-
 app.get('/tyreloans',async (req,res)=>{
     try{
         const url = process.env.TIGERSHEET_API_URL;
@@ -108,10 +115,24 @@ app.get('/tyreloans',async (req,res)=>{
 });
 
 app.post('/receiveToken',async (req, res) => {
-    const { notificationData } = req.body;
+    const { notificationData,token } = req.body;
+    // console.log(token);
+    const message={
+        notification:{
+            title:JSON.stringify(notificationData.notification.title),
+            body:JSON.stringify(notificationData.notification.body)
+        },
+        token:token
+    }
+    
+    admin.messaging().send(message).then(res=>{
+        console.log("Send Success");
+    }).catch(err=>{
+        console.log(err);
+    })
     console.log("Notification Data",notificationData);
     // await sendNotification(notificationData);
-    scheduleNotification(notificationData);
+    // scheduleNotification(notificationData);
     // cron.schedule('0-59 * * * *',async()=>{
     //     await sendNotification(notificationData);
     // })
@@ -120,7 +141,7 @@ app.post('/receiveToken',async (req, res) => {
 
 function scheduleNotification(notificationData) {
     // Set the interval for next execution (e.g., every 1 hour)
-    const interval = 30 * 1000; // 1 hour in milliseconds
+    const interval = 20 * 1000; // 1 hour in milliseconds
 
     // Use setTimeout to schedule next execution after the interval
     setInterval(async () => {
