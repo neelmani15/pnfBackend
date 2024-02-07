@@ -125,7 +125,7 @@ function scheduleNotification(notificationData) {
     // Use setTimeout to schedule next execution after the interval
     setInterval(async () => {
         await sendNotification(notificationData);
-    });
+    },interval);
 }
 
 const sendNotification=async (notificationData) => {
