@@ -280,7 +280,8 @@ app.post("/tyre",async (req,res)=>{
             date,
             NoOfTrucks,
             cnfPanNumber,
-            driverSalary
+            driverSalary,
+            loanType
         } = req.body;
 
         // const sourceValue = source ? source : 'null';
@@ -338,7 +339,8 @@ app.post("/tyre",async (req,res)=>{
             "803":{"value":truckNumber},
             "855":{"value":selectedBrand},
             "810":{"value":cnfPanNumber},
-            "804":{"value":driverSalary}
+            "804":{"value":driverSalary},
+            "1208":{"value":loanType}
         };
 
         if (source !== null) {
