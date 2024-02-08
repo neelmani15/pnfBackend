@@ -13,7 +13,6 @@ dotenv.config();
 const app = express();
 const customerRouter = express.Router();
 const Port = process.env.PORT || 5000;
-let UsermobileNumber=null
 
 app.use(bodyParser.json());
 app.use(cors());
@@ -22,7 +21,9 @@ app.use(cors());
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount)
 });
-
+let tokens =[]
+const firestore = admin.firestore()
+const messaging = admin.messaging();
 
 app.get('/', (req, res) => {
     res.send('Hello, welcome to PNF Loan Backend!');
@@ -114,71 +115,6 @@ app.get('/tyreloans',async (req,res)=>{
     }
 });
 
-app.post('/receiveToken',async (req, res) => {
-    const { tokens } = req.body;
-    console.log(tokens);
-    const message={
-        notification:{
-            title:"Data Add",
-            body:"Demo Data"
-        },
-        token:req.body.tokens
-    }
-    
-    await admin.messaging().sendMulticast(message).then(res=>{
-        console.log("Send Success");
-    }).catch(err=>{
-        console.log(err);
-    })
-    console.log("Notification Data",notificationData);
-    // await sendNotification(notificationData);
-    // scheduleNotification(notificationData);
-    // cron.schedule('0-59 * * * *',async()=>{
-    //     await sendNotification(notificationData);
-    // })
-    res.send('Send Notification successfully');
-});
-
-function scheduleNotification(notificationData) {
-    // Set the interval for next execution (e.g., every 1 hour)
-    const interval = 20 * 1000; // 1 hour in milliseconds
-
-    // Use setTimeout to schedule next execution after the interval
-    setInterval(async () => {
-        await sendNotification(notificationData);
-    },interval);
-}
-
-const sendNotification=async (notificationData) => {
-    try {
-        const fcmUrl = process.env.FCM_URL;
-        const fcmServerKey = process.env.FCM_SERVER_KEY; 
-        
-        // const notificationData = {
-        //     "to": "ekSiho_dS1yJch3Odt3Dd_:APA91bH6wuj_LipfDk2pvB_CVN4zpnRqjZyzLzjrY6s6U-qz7HgYx5QXlLoKJoEBa06MNS_QO_rzmcFBYKIB6UbG1u22EgLJVMtK8Ts0x2h-5PeAcqdOr2oRmrQIaTM2pJec1PczrlFR",
-        //     "notification": {
-        //         "body": "This is an FCM notification message!",
-        //         "title": "Upcoming EMI Status"
-        //     },
-        //     "data": {
-        //         "data_new": "Test Data"
-        //     }
-        // }
-        
-        
-        const response = await axios.post(fcmUrl, notificationData, {
-            headers: {
-                'Authorization': `Bearer ${process.env.FCM_SERVER_KEY}`,
-                'Content-Type': 'application/json',
-            },
-        });
-        
-        // res.send({ success: true, response: response.data });
-    } catch (err) {
-        console.error('Error sending FCM notification:', err.message);
-        // res.status(500).send('Internal Server Error');
-    }
-};
 
 async function gettyreloansRecords(url, headers, sheetId,criteria) {
     const payload = {
@@ -460,6 +396,121 @@ async function getVehicleRecords(url, headers, sheetId, criteria) {
   
     return response.data.data;
 }
+
+async function getemiduetomorrow() {
+    const today = new Date();
+    today.setDate(today.getDate()+1);
+    const year = today.getFullYear();
+    const month = today.getMonth() + 1;
+    const day = today.getDate();
+
+
+    const tomorrowDateString = `${year}-${month < 10 ? '0' : ''}${month}-${day < 10 ? '0' : ''}${day}`;
+
+
+    // console.log("Tomorrow's date:", String(tomorrowDateString));
+    const url1 =`${process.env.BACKEND_URL}/emi?criteria=sheet_${process.env.TIGERSHEET_EMI_SHEET_ID}.column_${process.env.TIGERSHEET_EMI_COLUMN_ID}=%22${tomorrowDateString}%22`
+    const res = await axios.get(url1);
+    const tomorrowemidue= res.data.data;
+
+
+    const allMobileNumbersWithEmi = [];
+    for (const emi of tomorrowemidue) {
+        const customername = emi['customer'];
+        // console.log("Customer Name:", customername);
+
+
+        const url2 = `${process.env.BACKEND_URL}/customer?criteria=sheet_${process.env.TIGERSHEET_CUSTOMER_SHEET_ID}.column_${process.env.TIGERSHEET_CUSTOMER_COLUMN_ID}=%22${customername}%22`;
+        const res1 = await axios.get(url2);
+        const customerdetails = res1.data.data;
+        // console.log("Customer Details:", customerdetails);
+
+
+        // Extract mobile numbers from customerdetails
+        const mobileNumbers = customerdetails.map(customer => {
+            return {
+                mobileNumber: customer['mobile number'],
+                tomorrowEmiDue: emi
+            };
+        });
+        // Add customer details to the array
+        allMobileNumbersWithEmi.push(...mobileNumbers);
+    }
+    // console.log(allMobileNumbersWithEmi);
+    return allMobileNumbersWithEmi;
+}
+// getemiduetomorrow()
+
+async function sendMulticastMessage(messageData, tokens) {
+    try {
+      const message = {
+        notification: messageData, // Custom data for the message
+        tokens: tokens, // Array of FCM tokens to send the message to
+        android: {
+            notification: {
+              // Set priority to high for prompt delivery
+              priority: 'high',
+            },
+          },
+      };
+  
+      const response = await messaging.sendMulticast(message);
+    //   console.log('Successfully sent message:', response);
+      return response;
+    } catch (error) {
+      console.error('Error sending message:', error);
+      throw error; 
+    }
+  }
+  async function main() {
+    try {
+       const emitomorrowdue = await getemiduetomorrow();
+    //    console.log(emitomorrowdue);
+      // Retrieve tokens from Firestore
+      const snapshot = await firestore.collection('customer').get();
+      const tokens = [];
+      const mobileNumberFirestore = []
+  
+      snapshot.forEach(doc => {
+        const mobile =doc.id
+        const token = doc.data().token;
+        tokens.push(token);
+        mobileNumberFirestore.push(mobile);
+      });
+      console.log(mobileNumberFirestore);
+      const mobileNumbersToNotify = [];
+      for (const emi of emitomorrowdue) {
+          const modifiedMobileNumber = emi.mobileNumber.slice(-10);
+          if (mobileNumberFirestore.indexOf(modifiedMobileNumber) !== -1) {
+              mobileNumbersToNotify.push(modifiedMobileNumber);
+              console.log(mobileNumbersToNotify);
+              
+                // Extract tokens for mobile numbers to notify
+                const tokensToNotify = mobileNumbersToNotify.map(mobileNumber => {
+                    const index = mobileNumberFirestore.indexOf(mobileNumber);
+                    return tokens[index];
+                });
+                console.log(tokensToNotify);
+              // Construct notification data for tomorrow's upcoming EMIs
+              const notificationData = {
+                title: `Upcoming EMI for Loan ${emi.tomorrowEmiDue['loan id']}`,
+                body: `Tomorrow is the last date for EMI Amount ₹ ${emi.tomorrowEmiDue['amount']}.`
+              };
+        
+            //   console.log(tokensToSend);
+          
+              // Send multicast message
+              await sendMulticastMessage(notificationData, tokensToNotify);
+          }
+      }
+    } catch (error) {
+      console.error('Error:', error);
+    }
+}
+
+// main()
+  // Call the main function
+setInterval(main,60000);
 
 app.listen(Port,()=>{
     console.log(`Server is running on ${Port}`);
