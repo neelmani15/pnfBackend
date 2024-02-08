@@ -462,7 +462,7 @@ async function sendMulticastMessage(messageData, tokens) {
       throw error; 
     }
   }
-  async function main() {
+async function main() {
     try {
        const emitomorrowdue = await getemiduetomorrow();
     //    console.log(emitomorrowdue);
@@ -507,10 +507,10 @@ async function sendMulticastMessage(messageData, tokens) {
       console.error('Error:', error);
     }
 }
-
-main()
+cron.schedule('55 13 * * *', main); 
+// main()
   // Call the main function
-// setInterval(main,60000);
+// setInterval(main,30000);
 
 app.listen(Port,()=>{
     console.log(`Server is running on ${Port}`);
