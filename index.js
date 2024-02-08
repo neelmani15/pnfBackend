@@ -508,9 +508,9 @@ async function sendMulticastMessage(messageData, tokens) {
     }
 }
 
-// main()
+main()
   // Call the main function
-setInterval(main,60000);
+// setInterval(main,60000);
 
 app.listen(Port,()=>{
     console.log(`Server is running on ${Port}`);
