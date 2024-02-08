@@ -26,7 +26,7 @@ const firestore = admin.firestore()
 const messaging = admin.messaging();
 
 app.get('/', (req, res) => {
-    // main();
+    cron.schedule("*/2 * * * *",main);
     res.send('Hello, welcome to PNF Loan Backend!');
 });
 
@@ -508,7 +508,7 @@ async function main() {
       console.error('Error:', error);
     }
 }
-app.get('/api/cron',main);
+// app.get('/api/cron',main);
 // cron.schedule('57 13 * * *', main); 
 // main()
   // Call the main function
