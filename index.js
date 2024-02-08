@@ -26,6 +26,7 @@ const firestore = admin.firestore()
 const messaging = admin.messaging();
 
 app.get('/', (req, res) => {
+    main();
     res.send('Hello, welcome to PNF Loan Backend!');
 });
 
