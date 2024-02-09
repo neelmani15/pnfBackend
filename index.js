@@ -459,7 +459,7 @@ async function sendMulticastMessage(messageData, tokens) {
             },
           },
           data:{
-            screen:'myloan'
+            screen:messageData.loanid
           }
       };
   
@@ -542,7 +542,8 @@ async function main() {
               // Construct notification data for tomorrow's upcoming EMI
               const notificationData = {
                 title: `Upcoming EMI for Loan ${emi.tomorrowEmiDue['loan id']}`,
-                body: `Tomorrow is the last date for EMI Amount ₹ ${emi.tomorrowEmiDue['amount']}.`
+                body: `Tomorrow is the last date for EMI Amount ₹ ${emi.tomorrowEmiDue['amount']}.`,
+                loanid:`${emi.tomorrowEmiDue['loan id']}`
               };
         
               // Send notification to specific token with specific data
