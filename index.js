@@ -26,7 +26,7 @@ const firestore = admin.firestore()
 const messaging = admin.messaging();
 
 app.get('/', (req, res) => {
-    main();
+    // main();
     res.send('Hello, welcome to PNF Loan Backend!');
 });
 
@@ -437,7 +437,7 @@ async function getemiduetomorrow() {
         // Add customer details to the array
         allMobileNumbersWithEmi.push(...mobileNumbers);
     }
-    // console.log(allMobileNumbersWithEmi);
+    console.log(allMobileNumbersWithEmi);
     return allMobileNumbersWithEmi;
 }
 // getemiduetomorrow()
@@ -466,7 +466,7 @@ async function sendMulticastMessage(messageData, tokens) {
 async function main() {
     try {
        const emitomorrowdue = await getemiduetomorrow();
-    //    console.log(emitomorrowdue);
+       console.log(emitomorrowdue);
       // Retrieve tokens from Firestore
       const snapshot = await firestore.collection('customer').get();
       const tokens = [];
@@ -508,9 +508,9 @@ async function main() {
       console.error('Error:', error);
     }
 }
-// app.get('/api/cron',main);
+app.get('/api/cron',main);
 // cron.schedule('57 13 * * *', main); 
-main()
+// main()
   // Call the main function
 // setInterval(main,30000);
 
