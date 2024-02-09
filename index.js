@@ -445,8 +445,13 @@ async function getemiduetomorrow() {
 async function sendMulticastMessage(messageData, tokens) {
     try {
       const message = {
-        notification: messageData, // Custom data for the message
-        tokens: tokens, // Array of FCM tokens to send the message to
+        // notification: messageData, // Custom data for the message
+        notification:{
+            title:messageData.title,
+            body:messageData.body
+        },
+        // tokens: tokens, // Array of FCM tokens to send the message to
+        token: tokens, // Array of FCM tokens to send the message to
         android: {
             notification: {
               // Set priority to high for prompt delivery
@@ -455,7 +460,8 @@ async function sendMulticastMessage(messageData, tokens) {
           },
       };
   
-      const response = await messaging.sendMulticast(message);
+    //   const response = await messaging.sendMulticast(message);
+      const response = await messaging.send(message);
     //   console.log('Successfully sent message:', response);
       return response;
     } catch (error) {
@@ -463,10 +469,56 @@ async function sendMulticastMessage(messageData, tokens) {
       throw error; 
     }
   }
+// async function main() {
+//     try {
+//        const emitomorrowdue = await getemiduetomorrow();
+//        console.log(emitomorrowdue);
+//       // Retrieve tokens from Firestore
+//       const snapshot = await firestore.collection('customer').get();
+//       const tokens = [];
+//       const mobileNumberFirestore = []
+  
+//       snapshot.forEach(doc => {
+//         const mobile =doc.id
+//         const token = doc.data().token;
+//         tokens.push(token);
+//         mobileNumberFirestore.push(mobile);
+//       });
+//       console.log(mobileNumberFirestore);
+//       const mobileNumbersToNotify = [];
+//       for (const emi of emitomorrowdue) {
+//           const modifiedMobileNumber = emi.mobileNumber.slice(-10);
+//           if (mobileNumberFirestore.indexOf(modifiedMobileNumber) !== -1) {
+//               mobileNumbersToNotify.push(modifiedMobileNumber);
+//               console.log(mobileNumbersToNotify);
+              
+//                 // Extract tokens for mobile numbers to notify
+//                 const tokensToNotify = mobileNumbersToNotify.map(mobileNumber => {
+//                     const index = mobileNumberFirestore.indexOf(mobileNumber);
+//                     return tokens[index];
+//                 });
+//                 console.log(tokensToNotify);
+//               // Construct notification data for tomorrow's upcoming EMIs
+//               const notificationData = {
+//                 title: `Upcoming EMI for Loan ${emi.tomorrowEmiDue['loan id']}`,
+//                 body: `Tomorrow is the last date for EMI Amount ₹ ${emi.tomorrowEmiDue['amount']}.`
+//               };
+        
+//             //   console.log(tokensToSend);
+          
+//               // Send multicast message
+//               await sendMulticastMessage(notificationData, tokensToNotify);
+//           }
+//       }
+//     } catch (error) {
+//       console.error('Error:', error);
+//     }
+// }
+
 async function main() {
     try {
        const emitomorrowdue = await getemiduetomorrow();
-       console.log(emitomorrowdue);
+    //    console.log(emitomorrowdue);
       // Retrieve tokens from Firestore
       const snapshot = await firestore.collection('customer').get();
       const tokens = [];
@@ -479,38 +531,29 @@ async function main() {
         mobileNumberFirestore.push(mobile);
       });
       console.log(mobileNumberFirestore);
-      const mobileNumbersToNotify = [];
       for (const emi of emitomorrowdue) {
           const modifiedMobileNumber = emi.mobileNumber.slice(-10);
-          if (mobileNumberFirestore.indexOf(modifiedMobileNumber) !== -1) {
-              mobileNumbersToNotify.push(modifiedMobileNumber);
-              console.log(mobileNumbersToNotify);
-              
-                // Extract tokens for mobile numbers to notify
-                const tokensToNotify = mobileNumbersToNotify.map(mobileNumber => {
-                    const index = mobileNumberFirestore.indexOf(mobileNumber);
-                    return tokens[index];
-                });
-                console.log(tokensToNotify);
-              // Construct notification data for tomorrow's upcoming EMIs
+          const mobileIndex = mobileNumberFirestore.indexOf(modifiedMobileNumber);
+          if (mobileIndex !== -1) {
+              const tokenToNotify = tokens[mobileIndex];
+              // Construct notification data for tomorrow's upcoming EMI
               const notificationData = {
                 title: `Upcoming EMI for Loan ${emi.tomorrowEmiDue['loan id']}`,
                 body: `Tomorrow is the last date for EMI Amount ₹ ${emi.tomorrowEmiDue['amount']}.`
               };
         
-            //   console.log(tokensToSend);
-          
-              // Send multicast message
-              await sendMulticastMessage(notificationData, tokensToNotify);
+              // Send notification to specific token with specific data
+              await sendMulticastMessage(notificationData, tokenToNotify);
           }
       }
     } catch (error) {
       console.error('Error:', error);
     }
 }
+
 app.get('/api/cron',main);
 // cron.schedule('57 13 * * *', main); 
-// main()
+main()
   // Call the main function
 // setInterval(main,30000);
 
