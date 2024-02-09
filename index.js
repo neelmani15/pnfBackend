@@ -458,6 +458,9 @@ async function sendMulticastMessage(messageData, tokens) {
               priority: 'high',
             },
           },
+          data:{
+            screen:'myloan'
+          }
       };
   
     //   const response = await messaging.sendMulticast(message);
