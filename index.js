@@ -553,7 +553,7 @@ async function main() {
 
 app.get('/api/cron',main);
 // cron.schedule('57 13 * * *', main); 
-main()
+// main()
   // Call the main function
 // setInterval(main,30000);
 
