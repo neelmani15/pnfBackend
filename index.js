@@ -519,45 +519,50 @@ async function sendMulticastMessage(messageData, tokens) {
 // }
 
 async function main() {
-    try {
-       const emitomorrowdue = await getemiduetomorrow();
-    //    console.log(emitomorrowdue);
-      // Retrieve tokens from Firestore
+  try {
+      const emitomorrowdue = await getemiduetomorrow();
       const snapshot = await firestore.collection('customer').get();
-      const tokens = [];
-      const mobileNumberFirestore = []
-  
+      const tokens = new Map();
+
+      // Store unique mobile numbers in a Set
+      const processedMobiles = new Set();
+
       snapshot.forEach(doc => {
-        const mobile =doc.id
-        const token = doc.data().token;
-        tokens.push(token);
-        mobileNumberFirestore.push(mobile);
+          const mobile = doc.id.slice(-10); // Assuming doc.id contains the full mobile number
+          const token = doc.data().token;
+          tokens.set(mobile, token);
       });
-      console.log(mobileNumberFirestore);
+
       for (const emi of emitomorrowdue) {
-          const modifiedMobileNumber = emi.mobileNumber.slice(-10);
-          const mobileIndex = mobileNumberFirestore.indexOf(modifiedMobileNumber);
-          if (mobileIndex !== -1) {
-              const tokenToNotify = tokens[mobileIndex];
-              // Construct notification data for tomorrow's upcoming EMI
+          const mobile = emi.mobileNumber.slice(-10);
+          
+          // Check if mobile number has already been processed
+          if (processedMobiles.has(mobile)) {
+              console.log(`Notification already sent for mobile number: ${mobile}`);
+              continue; // Skip processing if notification has already been sent
+          }
+
+          if (tokens.has(mobile)) {
+              const tokenToNotify = tokens.get(mobile);
               const notificationData = {
-                title: `Upcoming EMI for Loan ${emi.tomorrowEmiDue['loan id']}`,
-                body: `Tomorrow is the last date for EMI Amount ₹ ${emi.tomorrowEmiDue['amount']}.`,
-                loanid:`${emi.tomorrowEmiDue['loan id']}`
+                  title: `Upcoming EMI for Loan ${emi.tomorrowEmiDue['loan id']}`,
+                  body: `Tomorrow is the last date for EMI Amount ₹ ${emi.tomorrowEmiDue['amount']}.`,
+                  loanid: `${emi.tomorrowEmiDue['loan id']}`
               };
-        
-              // Send notification to specific token with specific data
               await sendMulticastMessage(notificationData, tokenToNotify);
+              
+              // Add processed mobile number to Set
+              processedMobiles.add(mobile);
           }
       }
-    } catch (error) {
+  } catch (error) {
       console.error('Error:', error);
-    }
+  }
 }
 
 app.get('/api/cron',main);
 // cron.schedule('57 13 * * *', main); 
-// main()
+main()
   // Call the main function
 // setInterval(main,30000);
 
