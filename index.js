@@ -6,12 +6,18 @@ const _ = require('lodash');
 const bodyParser = require('body-parser');
 const cron = require('node-cron');
 const admin = require('firebase-admin');
+const Emiroutes = require('./routes/Emiroutes');
+const CDLoanroutes = require('./routes/CDLoanroutes.js');
 var serviceAccount = require("./pnffrontend-firebase-adminsdk-wbif2-daf8b85b61.json");
+const TyreLoanRoutes= require('./routes/TyreLoanroutes.js');
+const CustomerRoutes = require('./routes/Customerroutes.js');
+const VehicleRoutes = require('./routes/Vehicleroutes.js');
+const CustomerKYCRoutes = require('./routes/CustomerKYCroutes.js');
+const TestLoanRoutes = require('./routes/TestLoanroutes.js');
 
 dotenv.config();
 
 const app = express();
-const customerRouter = express.Router();
 const Port = process.env.PORT || 5000;
 
 app.use(bodyParser.json());
@@ -30,167 +36,13 @@ app.get('/', (req, res) => {
     res.send('Hello, welcome to PNF Loan Backend!');
 });
 
-app.use('/customer', customerRouter);
-
-app.get('/cdloans',async (req,res)=>{
-    try{
-        const url = process.env.TIGERSHEET_API_URL;
-        const headers = {
-        'Authorization': process.env.TIGERSHEET_AUTHORIZATION_TOKEN,
-        'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
-        };
-        // console.log(req)
-        const sheetId = process.env.TIGERSHEET_CDLOANS_SHEET_ID;
-        // Get criteria from request query parameters
-        const criteria = req.query.criteria || '';;
-        const cdloansRecords = await getcdloansRecords(url, headers, sheetId,criteria);
-        res.send({data:cdloansRecords})
-
-    }catch(err){
-        console.error('Error in fetching data:', err.message);
-        res.status(500).send('Internal Server Error');
-    }
-});
-
-async function getcdloansRecords(url, headers, sheetId,criteria) {
-    const payload = {
-      'sheet_id': sheetId,
-      'criteria': criteria,
-    //   'sort':JSON.stringify([{"property":"column_70","direction":"desc"}])
-    };
-  
-    const response = await axios.post(url, payload, { headers });
-    // console.log('All Records from Tigersheet Backend', response.data);
-
-    return response.data.data;
-  }
-
-app.get('/emi',async (req,res)=>{
-    try{
-        const url = process.env.TIGERSHEET_API_URL;
-        const headers = {
-        'Authorization': process.env.TIGERSHEET_AUTHORIZATION_TOKEN,
-        'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
-        };
-        const sheetId = process.env.TIGERSHEET_EMI_SHEET_ID;
-        // Get criteria from request query parameters
-        const criteria = req.query.criteria || '';
-        
-        const emiRecords = await getemiRecords(url, headers, sheetId,criteria);
-        res.send({data:emiRecords})
-    }
-    catch(err){
-        console.error('Error in fetching data:', err.message);
-        res.status(500).send('Internal Server Error');
-    }
-})
-
-async function getemiRecords(url, headers, sheetId,criteria) {
-    const payload = {
-      'sheet_id': sheetId,
-      'criteria': criteria,
-    };
-  
-    const response = await axios.post(url, payload, { headers });
-    // console.log('All Records from Tigersheet Backend', response.data);
-  
-    return response.data.data;
-  }
-
-app.get('/tyreloans',async (req,res)=>{
-    try{
-        const url = process.env.TIGERSHEET_API_URL;
-        const headers = {
-        'Authorization': process.env.TIGERSHEET_AUTHORIZATION_TOKEN,
-        'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
-        };
-        const sheetId = process.env.TIGERSHEET_TYRELOANS_SHEET_ID;
-        // Get criteria from request query parameters
-        const criteria = req.query.criteria || '';;
-        // console.log(req);
-        const cdloansRecords = await gettyreloansRecords(url, headers, sheetId,criteria);
-        res.send({data:cdloansRecords})
-    }catch(err){
-        console.error('Error in fetching data:', err.message);
-        res.status(500).send('Internal Server Error');
-    }
-});
-
-
-async function gettyreloansRecords(url, headers, sheetId,criteria) {
-    const payload = {
-      'sheet_id': sheetId,
-      'criteria': criteria,
-    //   'sort':JSON.stringify([{"property":"column_85","direction":"desc"}])
-    };
-  
-    const response = await axios.post(url, payload, { headers });
-    // console.log('All Records from Tigersheet Backend', response.data);
-  
-    return response.data.data;
-}
-
-customerRouter.get('/',async (req,res)=>{
-    try{
-        const url = process.env.TIGERSHEET_API_URL;
-        const headers = {
-        'Authorization': process.env.TIGERSHEET_AUTHORIZATION_TOKEN,
-        'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
-        };
-        const sheetId = process.env.TIGERSHEET_CUSTOMER_SHEET_ID;
-        // Get criteria from request query parameters
-        const criteria = req.query.criteria || '';;
-        const cdloansRecords = await getcustomerRecords(url, headers, sheetId,criteria);
-        res.send({data:cdloansRecords})
-
-    }catch(err){
-        console.error('Error in fetching data:', err.message);
-        res.status(500).send('Internal Server Error');
-    }
-})
-
-async function getcustomerRecords(url, headers, sheetId,criteria) {
-    const payload = {
-      'sheet_id': sheetId,
-      'criteria': criteria,
-    //   'sort':JSON.stringify([{"property":"column_85","direction":"desc"}])
-    };
-    const response = await axios.post(url, payload, { headers });
-    // console.log('All Records from Tigersheet Backend', response.data);
-  
-    return response.data.data;
-}
-
-customerRouter.get('/trucks',async (req,res)=>{
-    try{
-        const url = process.env.TIGERSHEET_API_URL;
-        const headers = {
-        'Authorization': process.env.TIGERSHEET_AUTHORIZATION_TOKEN,
-        'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
-        };
-        const sheetId = process.env.TIGERSHEET_TRUCK_SHEET_ID;
-        // Get criteria from request query parameters
-        const criteria = req.query.criteria || '';;
-        const truckRecords = await gettruckRecords(url, headers, sheetId,criteria);
-        res.send({data:truckRecords})
-
-    }catch(err){
-        console.error('Error in fetching data:', err.message);
-        res.status(500).send('Internal Server Error');
-    }
-})
-
-async function gettruckRecords(url, headers, sheetId,criteria) {
-    const payload = {
-      'sheet_id': sheetId,
-      'criteria': criteria,
-    //   'sort':JSON.stringify([{"property":"column_85","direction":"desc"}])
-    };
-    const response = await axios.post(url, payload, { headers });
-    // console.log('All Records from Tigersheet Backend', response.data);
-  
-    return response.data.data;
-}
+app.use('/customer', CustomerRoutes);
+app.use('/cdloans',CDLoanroutes);
+app.use('/emi',Emiroutes);
+app.use('/tyreloans',TyreLoanRoutes);
+app.use('/customerKyc',CustomerKYCRoutes );
+app.use('/vehicles',VehicleRoutes);
+app.use('/testloans',TestLoanRoutes);
 
 app.post("/tyre",async (req,res)=>{
     try{
@@ -326,6 +178,7 @@ app.post("/tyre",async (req,res)=>{
     }
 });
 
+
 async function getTyreData(url,headers,sheetId,data){
     const payload={
         'sheet_id':sheetId,
@@ -337,66 +190,7 @@ async function getTyreData(url,headers,sheetId,data){
     return response.data.data;
 }
 
-app.get('/customerKyc', async (req, res) => {
-    try {
-        const url = process.env.TIGERSHEET_API_URL;
-        const headers = {
-            'Authorization': process.env.TIGERSHEET_AUTHORIZATION_TOKEN,
-            'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
-        };
-        const sheetId = process.env.TIGERSHEET_CUSTOMER_KYC_SHEET_ID;
-        // Get criteria from request query parameters
-        const criteria = req.query.criteria || '';
-        const customerKycRecords = await getCustomerKycRecords(url, headers, sheetId, criteria);
-        res.send({ data: customerKycRecords });
-    } catch (err) {
-        console.error('Error in fetching customerKyc data:', err.message);
-        res.status(500).send('Internal Server Error');
-    }
-  });
-  
-async function getCustomerKycRecords(url, headers, sheetId, criteria) {
-    const payload = {
-        'sheet_id': sheetId,
-        'criteria': criteria,
-    };
-  
-    const response = await axios.post(url, payload, { headers });
-    console.log('All Records from Tigersheet Backend', response.data);
-  
-    return response.data.data;
-  }
 
-app.get('/vehicles', async (req, res) => {
-    try {
-      const url = process.env.TIGERSHEET_API_URL;
-      const headers = {
-        'Authorization': process.env.TIGERSHEET_AUTHORIZATION_TOKEN,
-        'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
-      };
-      const sheetId = process.env.TIGERSHEET_VEHICLE_SHEET_ID;
-      const criteria = req.query.criteria || '';
-  
-      const vehicleRecords = await getVehicleRecords(url, headers, sheetId, criteria);
-      res.send({ data: vehicleRecords });
-  
-    } catch (err) {
-      console.error('Error in fetching data:', err.message);
-      res.status(500).send('Internal Server Error');
-    }
-  });
-  
-async function getVehicleRecords(url, headers, sheetId, criteria) {
-    const payload = {
-      'sheet_id': sheetId,
-      'criteria': criteria,
-    };
-  
-    const response = await axios.post(url, payload, { headers });
-    console.log('All Records from Tigersheet Backend for Vehicles', response.data);
-  
-    return response.data.data;
-}
 
 async function getemiduetomorrow() {
     const today = new Date();
@@ -437,7 +231,7 @@ async function getemiduetomorrow() {
         // Add customer details to the array
         allMobileNumbersWithEmi.push(...mobileNumbers);
     }
-    console.log(allMobileNumbersWithEmi);
+    // console.log(allMobileNumbersWithEmi);
     return allMobileNumbersWithEmi;
 }
 // getemiduetomorrow()
@@ -522,6 +316,7 @@ async function main() {
   try {
       const emitomorrowdue = await getemiduetomorrow();
       const snapshot = await firestore.collection('customer').get();
+    //   console.log(snapshot);
       const tokens = new Map();
 
       // Store unique mobile numbers in a Set
@@ -561,8 +356,9 @@ async function main() {
 }
 
 app.get('/api/cron',main);
+
 // cron.schedule('57 13 * * *', main); 
-// main()
+main()
   // Call the main function
 // setInterval(main,30000);
 
