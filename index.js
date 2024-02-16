@@ -44,7 +44,7 @@ app.use('/tyreloans',TyreLoanRoutes);
 app.use('/customerKyc',CustomerKYCRoutes );
 app.use('/vehicles',VehicleRoutes);
 app.use('/testloans',TestLoanRoutes);
-app.use('tyre',TyreDataRoutes);
+app.use('/tyre',TyreDataRoutes);
 
 async function getemiduetomorrow() {
     const today = new Date();
