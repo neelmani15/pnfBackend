@@ -1,3 +1,17 @@
+const axios = require('axios');
+const admin = require('firebase-admin');
+var serviceAccount = require('../pnffrontend-firebase-adminsdk-wbif2-daf8b85b61.json');
+const dotenv = require('dotenv');
+
+dotenv.config();
+
+admin.initializeApp({
+    credential: admin.credential.cert(serviceAccount)
+});
+
+const firestore = admin.firestore()
+const messaging = admin.messaging();
+
 async function getemiduetomorrow() {
     const today = new Date();
     today.setDate(today.getDate()+1);
@@ -117,7 +131,7 @@ async function sendMulticastMessage(messageData, tokens) {
 //     }
 // }
 
-async function main() {
+async function emiTomorrowPN() {
     try {
         const emitomorrowdue = await getemiduetomorrow();
         console.log(emitomorrowdue);
@@ -139,7 +153,7 @@ async function main() {
             
             // Check if mobile number has already been processed
             if (processedMobiles.has(mobile1)) {
-                console.log(`Notification already sent for mobile number: ${mobile}`);
+                console.log(`Notification already sent for mobile number: ${mobile1}`);
                 continue; // Skip processing if notification has already been sent
             }
   
@@ -160,5 +174,5 @@ async function main() {
         console.error('Error:', error);
     }
   }
-
-  module.exports = main;
+//  emiTomorrowPN()
+  module.exports = emiTomorrowPN;
