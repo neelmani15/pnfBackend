@@ -14,6 +14,7 @@ const CustomerRoutes = require('./routes/Customerroutes.js');
 const VehicleRoutes = require('./routes/Vehicleroutes.js');
 const CustomerKYCRoutes = require('./routes/CustomerKYCroutes.js');
 const TestLoanRoutes = require('./routes/TestLoanroutes.js');
+const TyreDataRoutes = require('./routes/TyreDataroutes.js');
 
 dotenv.config();
 
@@ -43,154 +44,7 @@ app.use('/tyreloans',TyreLoanRoutes);
 app.use('/customerKyc',CustomerKYCRoutes );
 app.use('/vehicles',VehicleRoutes);
 app.use('/testloans',TestLoanRoutes);
-
-app.post("/tyre",async (req,res)=>{
-    try{
-        const url=process.env.TIGERSHEET_API_CREATE_URL;
-        const headers={
-            'Authorization':process.env.TIGERSHEET_AUTHORIZATION_TOKEN,
-            'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
-        }
-        const sheetId = process.env.TIGERSHEET_TYRE_LOAN_SHEET_ID;
-        // Extract data from the request body
-        const { 
-            numberOfTires, 
-            selectedBrand, 
-            loanAmount,
-            mobilenumber,
-            FullName, 
-            PanNumber, 
-            AlternateMobileNumber,
-            martialStatus,
-            numchildren,
-            houseType,
-            truckNumber,
-            source,
-            date,
-            NoOfTrucks,
-            cnfPanNumber,
-            driverSalary,
-            loanType,
-            monthlyEMIOutflow
-        } = req.body;
-
-        // const sourceValue = source ? source : 'null';
-        // const sourceValue = "ASHPAK"
-
-        // const sourceJsonValue = source
-        //     ? JSON.stringify({
-        //         "reference_column_id": 236,
-        //         "value": source
-        //     })
-        //     : JSON.stringify({});
-
-
-        // console.log("Source",source);
-        // console.log("Source Value",sourceValue);
-
-        // const data = JSON.stringify({
-        //     "30541":{"value":numberOfTires },
-        //     "30542":{"value":selectedBrand},
-        //     "30543":{"value":loanAmount },
-        //     "31495":{"value":mobilenumber},
-        //     "31820":{"value":FullName},
-        //     "31821":{"value":PanNumber},
-        //     "31822":{"value":AlternateMobileNumber},
-        //     "31854":{"value":martialStatus},
-        //     "31855":{"value":numchildren},
-        //     "31856":{"value":houseType},
-        //     "31857":{"value":truckNumber},
-        //     "31858":{"value":date},
-        //     "31859":{"value":source},
-        //     "32063":{"value":NoOfTrucks},
-        //     "32122":{"value":cnfPanNumber}
-        // });
-
-        // const sourceJsonValue = JSON.stringify({
-        //     "reference_column_id": 236,
-        //     "value": sourceValue
-        // });
-
-        const dataField = {
-            "791":{"value":FullName},
-            "790":{"value":date},
-            "805":{"value":loanAmount },            
-            // "807":sourceJsonValue,
-            // "807":{"value":"{\"reference_column_id\":236,\"value\":\"PARMANAND\"}"},
-            // "807": {"value": `{"reference_column_id":236,"value":"${source}"}`},
-            "806":{"value":numberOfTires },
-            "792":{"value":PanNumber},
-            "793":{"value":mobilenumber},
-            "794":{"value":AlternateMobileNumber},
-            "795":{"value":NoOfTrucks},
-            "800":{"value":martialStatus},
-            "801":{"value":numchildren},
-            "802":{"value":houseType},
-            "803":{"value":truckNumber},
-            "855":{"value":selectedBrand},
-            "810":{"value":cnfPanNumber},
-            "804":{"value":driverSalary},
-            "1208":{"value":loanType},
-            "798":{"value":monthlyEMIOutflow}
-        };
-
-        if (source !== null) {
-            dataField["807"] = {"value": JSON.stringify({
-                "reference_column_id": 236,
-                "value": source
-            })};
-        } else {
-            dataField["807"] = {"value": null};
-        }
-
-        const data = JSON.stringify(dataField);
-
-        // const data = JSON.stringify({
-        //     "791":{"value":FullName},
-        //     "790":{"value":date},
-        //     "805":{"value":loanAmount },            
-        //     "807":sourceJsonValue,
-        //     // "807":{"value":"{\"reference_column_id\":236,\"value\":\"PARMANAND\"}"},
-        //     // "807": {"value": `{"reference_column_id":236,"value":"${source}"}`},
-        //     "806":{"value":numberOfTires },
-        //     "792":{"value":PanNumber},
-        //     "793":{"value":mobilenumber},
-        //     "794":{"value":AlternateMobileNumber},
-        //     "795":{"value":NoOfTrucks},
-        //     "800":{"value":martialStatus},
-        //     "801":{"value":numchildren},
-        //     "802":{"value":houseType},
-        //     "803":{"value":truckNumber},
-        //     "855":{"value":selectedBrand},
-        //     "810":{"value":cnfPanNumber},
-        //     "804":{"value":driverSalary}
-        // });
-
-        // console.log('Source:', source);
-
-        const tyreData= await getTyreData(url,headers,sheetId,data);
-
-        res.send({data:tyreData})
-        
-    }catch(err){
-        console.error('Error in fetching data:', err.message);
-        res.status(500).send('Internal Server Error');
-    }
-});
-
-
-async function getTyreData(url,headers,sheetId,data){
-    const payload={
-        'sheet_id':sheetId,
-        'data':data
-    }
-    const response = await axios.post(url, payload, { headers });
-    // console.log('All Records from Tigersheet Backend', response.data);
-  
-    return response.data.data;
-}
-
-
+app.use('tyre',TyreDataRoutes);
 
 async function getemiduetomorrow() {
     const today = new Date();
@@ -207,14 +61,13 @@ async function getemiduetomorrow() {
     const url1 =`${process.env.BACKEND_URL}/emi?criteria=sheet_${process.env.TIGERSHEET_EMI_SHEET_ID}.column_${process.env.TIGERSHEET_EMI_COLUMN_ID}=%22${tomorrowDateString}%22`
     const res = await axios.get(url1);
     const tomorrowemidue= res.data.data;
+    // console.log(tomorrowemidue)
 
 
     const allMobileNumbersWithEmi = [];
     for (const emi of tomorrowemidue) {
         const customername = emi['customer'];
         // console.log("Customer Name:", customername);
-
-
         const url2 = `${process.env.BACKEND_URL}/customer?criteria=sheet_${process.env.TIGERSHEET_CUSTOMER_SHEET_ID}.column_${process.env.TIGERSHEET_CUSTOMER_COLUMN_ID}=%22${customername}%22`;
         const res1 = await axios.get(url2);
         const customerdetails = res1.data.data;
@@ -315,6 +168,7 @@ async function sendMulticastMessage(messageData, tokens) {
 async function main() {
   try {
       const emitomorrowdue = await getemiduetomorrow();
+      console.log(emitomorrowdue);
       const snapshot = await firestore.collection('customer').get();
     //   console.log(snapshot);
       const tokens = new Map();
@@ -329,16 +183,16 @@ async function main() {
       });
 
       for (const emi of emitomorrowdue) {
-          const mobile = emi.mobileNumber.slice(-10);
+          const mobile1 = emi.mobileNumber.slice(-10);
           
           // Check if mobile number has already been processed
-          if (processedMobiles.has(mobile)) {
+          if (processedMobiles.has(mobile1)) {
               console.log(`Notification already sent for mobile number: ${mobile}`);
               continue; // Skip processing if notification has already been sent
           }
 
-          if (tokens.has(mobile)) {
-              const tokenToNotify = tokens.get(mobile);
+          if (tokens.has(mobile1)) {
+              const tokenToNotify = tokens.get(mobile1);
               const notificationData = {
                   title: `Upcoming EMI for Loan ${emi.tomorrowEmiDue['loan id']}`,
                   body: `Tomorrow is the last date for EMI Amount ₹ ${emi.tomorrowEmiDue['amount']}.`,
@@ -347,7 +201,7 @@ async function main() {
               await sendMulticastMessage(notificationData, tokenToNotify);
               
               // Add processed mobile number to Set
-              processedMobiles.add(mobile);
+              processedMobiles.add(mobile1);
           }
       }
   } catch (error) {
@@ -355,10 +209,10 @@ async function main() {
   }
 }
 
-app.get('/api/cron',main);
+// app.get('/api/cron',main);
 
 // cron.schedule('57 13 * * *', main); 
-main()
+// main()
   // Call the main function
 // setInterval(main,30000);
 
