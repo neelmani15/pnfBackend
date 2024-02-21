@@ -22,6 +22,7 @@ const TyreData = async (req,res)=>{
             houseType,
             truckNumber,
             source,
+            sourcerefid,
             date,
             NoOfTrucks,
             cnfPanNumber,
@@ -72,8 +73,8 @@ const TyreData = async (req,res)=>{
             "790":{"value":date},
             "805":{"value":loanAmount },            
             // "807":sourceJsonValue,
-            // "807":{"value":"{\"reference_column_id\":236,\"value\":\"PARMANAND\"}"},
-            // "807": {"value": `{"reference_column_id":236,"value":"${source}"}`},
+            // "807":{"value":"{\"reference_column_id\":7,\"value\":\"SHARMILA\"}"},
+            "807": {"value": `{"reference_column_id":"${sourcerefid}","value":"${source}"}`},
             "806":{"value":numberOfTires },
             "792":{"value":PanNumber},
             "793":{"value":mobilenumber},
@@ -90,14 +91,14 @@ const TyreData = async (req,res)=>{
             "798":{"value":monthlyEMIOutflow}
         };
 
-        if (source !== null) {
-            dataField["807"] = {"value": JSON.stringify({
-                "reference_column_id": 236,
-                "value": source
-            })};
-        } else {
-            dataField["807"] = {"value": null};
-        }
+        // if (source !== null) {
+        //     dataField["807"] = {"value": JSON.stringify({
+        //         "reference_column_id": 236,
+        //         "value": source
+        //     })};
+        // } else {
+        //     dataField["807"] = {"value": null};
+        // }
 
         const data = JSON.stringify(dataField);
 
@@ -107,7 +108,7 @@ const TyreData = async (req,res)=>{
         //     "805":{"value":loanAmount },            
         //     "807":sourceJsonValue,
         //     // "807":{"value":"{\"reference_column_id\":236,\"value\":\"PARMANAND\"}"},
-        //     // "807": {"value": `{"reference_column_id":236,"value":"${source}"}`},
+            // "807": {"value": `{"reference_column_id":236,"value":"${source}"}`},
         //     "806":{"value":numberOfTires },
         //     "792":{"value":PanNumber},
         //     "793":{"value":mobilenumber},
