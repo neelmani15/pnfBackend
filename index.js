@@ -14,7 +14,7 @@ const CustomerKYCRoutes = require('./routes/CustomerKYCroutes.js');
 const TestLoanRoutes = require('./routes/TestLoanroutes.js');
 const TyreDataRoutes = require('./routes/TyreDataroutes.js');
 const emiTomorrowPN = require('./utils/TomorrowEMIDuePN.js');
-
+const BrandData = require('./routes/Brandroute.js')
 dotenv.config();
 
 const app = express();
@@ -36,7 +36,7 @@ app.use('/customerKyc',CustomerKYCRoutes );
 app.use('/vehicles',VehicleRoutes);
 app.use('/testloans',TestLoanRoutes);
 app.use('/tyre',TyreDataRoutes);
-
+app.use('/brand', BrandData);
 app.get('/api/cron',emiTomorrowPN);
 
 app.listen(Port,()=>{

@@ -9,6 +9,7 @@ const TyreData = async (req,res)=>{
         }
         const sheetId = process.env.TIGERSHEET_TYRE_LOAN_SHEET_ID;
         // Extract data from the request body
+        //console.log(req.body)
         const { 
             numberOfTires, 
             selectedBrand, 
@@ -28,106 +29,45 @@ const TyreData = async (req,res)=>{
             cnfPanNumber,
             driverSalary,
             loanType,
-            monthlyEMIOutflow
+            monthlyEMIOutflow,
+            selectedProduct,
+            oldornew,
+            numberOfYearsInBusiness,
+            dob
         } = req.body;
-
-        // const sourceValue = source ? source : 'null';
-        // const sourceValue = "ASHPAK"
-
-        // const sourceJsonValue = source
-        //     ? JSON.stringify({
-        //         "reference_column_id": 236,
-        //         "value": source
-        //     })
-        //     : JSON.stringify({});
-
-
-        // console.log("Source",source);
-        // console.log("Source Value",sourceValue);
-
-        // const data = JSON.stringify({
-        //     "30541":{"value":numberOfTires },
-        //     "30542":{"value":selectedBrand},
-        //     "30543":{"value":loanAmount },
-        //     "31495":{"value":mobilenumber},
-        //     "31820":{"value":FullName},
-        //     "31821":{"value":PanNumber},
-        //     "31822":{"value":AlternateMobileNumber},
-        //     "31854":{"value":martialStatus},
-        //     "31855":{"value":numchildren},
-        //     "31856":{"value":houseType},
-        //     "31857":{"value":truckNumber},
-        //     "31858":{"value":date},
-        //     "31859":{"value":source},
-        //     "32063":{"value":NoOfTrucks},
-        //     "32122":{"value":cnfPanNumber}
-        // });
-
-        // const sourceJsonValue = JSON.stringify({
-        //     "reference_column_id": 236,
-        //     "value": sourceValue
-        // });
-
         const dataField = {
-            "791":{"value":FullName},
-            "790":{"value":date},
-            "805":{"value":loanAmount },            
+            "201":{"value":FullName},
+            "200":{"value":date},
+            "215":{"value":loanAmount },            
             // "807":sourceJsonValue,
             // "807":{"value":"{\"reference_column_id\":7,\"value\":\"SHARMILA\"}"},
-            "807": {"value": `{"reference_column_id":"${sourcerefid}","value":"${source}"}`},
-            "806":{"value":numberOfTires },
-            "792":{"value":PanNumber},
-            "793":{"value":mobilenumber},
-            "794":{"value":AlternateMobileNumber},
-            "795":{"value":NoOfTrucks},
-            "800":{"value":martialStatus},
-            "801":{"value":numchildren},
-            "802":{"value":houseType},
-            "803":{"value":truckNumber},
-            "855":{"value":selectedBrand},
-            "810":{"value":cnfPanNumber},
-            "804":{"value":driverSalary},
-            "1208":{"value":loanType},
-            "798":{"value":monthlyEMIOutflow}
+            "217": {"value": `{"reference_column_id":"${sourcerefid}","value":"${source}"}`},
+            "216":{"value":numberOfTires },
+            "202":{"value":PanNumber},
+            "203":{"value":mobilenumber},
+            "204":{"value":AlternateMobileNumber},
+            "205":{"value":NoOfTrucks},
+            "210":{"value":martialStatus},
+            "211":{"value":numchildren},
+            "212":{"value":houseType},
+            "213":{"value":truckNumber},
+            "839":{"value":selectedBrand},
+            "234":{"value":cnfPanNumber},
+            "214":{"value":driverSalary},
+            "1412":{"value":loanType},
+            "208":{"value":monthlyEMIOutflow},
+            "1453":{"value": selectedProduct},
+            "243": {"value": oldornew},
+            "206": {"value": numberOfYearsInBusiness},
+            "1421": {"value": dob},
         };
 
-        // if (source !== null) {
-        //     dataField["807"] = {"value": JSON.stringify({
-        //         "reference_column_id": 236,
-        //         "value": source
-        //     })};
-        // } else {
-        //     dataField["807"] = {"value": null};
-        // }
+    
 
         const data = JSON.stringify(dataField);
-
-        // const data = JSON.stringify({
-        //     "791":{"value":FullName},
-        //     "790":{"value":date},
-        //     "805":{"value":loanAmount },            
-        //     "807":sourceJsonValue,
-        //     // "807":{"value":"{\"reference_column_id\":236,\"value\":\"PARMANAND\"}"},
-            // "807": {"value": `{"reference_column_id":236,"value":"${source}"}`},
-        //     "806":{"value":numberOfTires },
-        //     "792":{"value":PanNumber},
-        //     "793":{"value":mobilenumber},
-        //     "794":{"value":AlternateMobileNumber},
-        //     "795":{"value":NoOfTrucks},
-        //     "800":{"value":martialStatus},
-        //     "801":{"value":numchildren},
-        //     "802":{"value":houseType},
-        //     "803":{"value":truckNumber},
-        //     "855":{"value":selectedBrand},
-        //     "810":{"value":cnfPanNumber},
-        //     "804":{"value":driverSalary}
-        // });
-
-        // console.log('Source:', source);
-
         const tyreData= await getTyreData(url,headers,sheetId,data);
-
-        res.send({data:tyreData})
+        console.log(tyreData)
+        res.status(200).send({ data: tyreData });
         
     }catch(err){
         console.error('Error in fetching data:', err.message);
