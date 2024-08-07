@@ -7,7 +7,7 @@ const TyreData = async (req,res)=>{
             'Authorization':process.env.TIGERSHEET_AUTHORIZATION_TOKEN,
             'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
         }
-        const sheetId = process.env.TIGERSHEET_TYRE_LOAN_SHEET_ID;
+        const sheetId = 38562544;
         // Extract data from the request body
         //console.log(req.body)
         const { 
