@@ -130,22 +130,139 @@
 //   }
 // //  emiTomorrowPN()
 //   module.exports = emiTomorrowPN;
+// const axios = require('axios');
+// const admin = require('firebase-admin');
+// const serviceAccount = require('../pnffrontend-firebase-adminsdk-wbif2-daf8b85b61.json');
+// const dotenv = require('dotenv');
+
+// dotenv.config();
+
+// admin.initializeApp({
+//     credential: admin.credential.cert(serviceAccount)
+// });
+
+// const firestore = admin.firestore();
+// const messaging = admin.messaging();
+
+// async function getEmiDueTomorrow() {
+//     console.log("Function is calling");
+//     const today = new Date();
+//     today.setDate(today.getDate() + 1);
+//     const year = today.getFullYear();
+//     const month = today.getMonth() + 1;
+//     const day = today.getDate();
+
+//     const tomorrowDateString = `${year}-${month < 10 ? '0' : ''}${month}-${day < 10 ? '0' : ''}${day}`;
+
+//     const url1 = `https://pnf-backend.vercel.app/emi?criteria=sheet_${process.env.TIGERSHEET_EMI_SHEET_ID}.column_${process.env.TIGERSHEET_EMI_COLUMN_ID}=%22${tomorrowDateString}%22`;
+//     const { data } = await axios.get(url1);
+//     const tomorrowEmiDue = data.data;
+//     console.log(res.data)
+
+//     // Fetch customer details in parallel
+//     const customerRequests = tomorrowEmiDue.map(async (emi) => {
+//         const customerName = emi['customer'];
+//         const url2 = `https://pnf-backend.vercel.app/customer?criteria=sheet_${process.env.TIGERSHEET_CUSTOMER_SHEET_ID}.column_${process.env.TIGERSHEET_CUSTOMER_COLUMN_ID}=%22${customerName}%22`;
+//         const { data: customerData } = await axios.get(url2);
+//         return customerData.data.map(customer => ({
+//             mobileNumber: customer['mobile number'],
+//             tomorrowEmiDue: emi
+//         }));
+//     });
+
+//     const allMobileNumbersWithEmi = (await Promise.all(customerRequests)).flat();
+//     return allMobileNumbersWithEmi;
+// }
+
+// async function sendMulticastMessage(messageData, tokens) {
+//     try {
+//         const message = {
+//             notification: {
+//                 title: messageData.title,
+//                 body: messageData.body
+//             },
+//             token: tokens,
+//             android: {
+//                 notification: {
+//                     priority: 'high'
+//                 }
+//             },
+//             data: {
+//                 screen: messageData.loanid
+//             }
+//         };
+
+//         const response = await messaging.send(message);
+//         console.log('Successfully sent message:', response);
+//         return response;
+//     } catch (error) {
+//         console.error('Error sending message:', error);
+//         throw error;
+//     }
+// }
+
+// async function emiTomorrowPN() {
+//     try {
+//         const emiDueTomorrow = await getEmiDueTomorrow();
+//         console.log(emiDueTomorrow);
+
+//         const snapshot = await firestore.collection('customer').get();
+//         const tokens = new Map();
+
+//         snapshot.forEach(doc => {
+//             const mobile = doc.id.slice(-10); // Assuming doc.id contains the full mobile number
+//             const token = doc.data().token;
+//             tokens.set(mobile, token);
+//         });
+
+//         // Use a Set to keep track of processed mobile numbers
+//         const processedMobiles = new Set();
+
+//         // Send notifications in parallel
+//         const notificationRequests = emiDueTomorrow.map(async (emi) => {
+//             const mobile1 = emi.mobileNumber.slice(-10);
+
+//             if (processedMobiles.has(mobile1)) {
+//                 console.log(`Notification already sent for mobile number: ${mobile1}`);
+//                 return; // Skip if notification has already been sent
+//             }
+
+//             if (tokens.has(mobile1)) {
+//                 const tokenToNotify = tokens.get(mobile1);
+//                 const notificationData = {
+//                     title: `Upcoming EMI for Loan ${emi.tomorrowEmiDue['loan id']}`,
+//                     body: `Tomorrow is the last date for EMI Amount ₹ ${emi.tomorrowEmiDue['amount']}.`,
+//                     loanid: `${emi.tomorrowEmiDue['loan id']}`
+//                 };
+
+//                 await sendMulticastMessage(notificationData, tokenToNotify);
+//                 processedMobiles.add(mobile1); // Mark mobile number as processed
+//             }
+//         });
+
+//         await Promise.all(notificationRequests);
+//     } catch (error) {
+//         console.error('Error:', error);
+//     }
+// }
+
+// module.exports = emiTomorrowPN;
 const axios = require('axios');
 const admin = require('firebase-admin');
-const serviceAccount = require('../pnffrontend-firebase-adminsdk-wbif2-daf8b85b61.json');
 const dotenv = require('dotenv');
+const serviceAccount = require('../pnffrontend-firebase-adminsdk-wbif2-daf8b85b61.json');
 
 dotenv.config();
 
 admin.initializeApp({
-    credential: admin.credential.cert(serviceAccount)
+    credential: admin.credential.cert(serviceAccount),
 });
 
 const firestore = admin.firestore();
 const messaging = admin.messaging();
 
 async function getEmiDueTomorrow() {
-    console.log("Function is calling");
+    console.log("Fetching EMI due tomorrow...");
     const today = new Date();
     today.setDate(today.getDate() + 1);
     const year = today.getFullYear();
@@ -153,42 +270,40 @@ async function getEmiDueTomorrow() {
     const day = today.getDate();
 
     const tomorrowDateString = `${year}-${month < 10 ? '0' : ''}${month}-${day < 10 ? '0' : ''}${day}`;
-
     const url1 = `https://pnf-backend.vercel.app/emi?criteria=sheet_${process.env.TIGERSHEET_EMI_SHEET_ID}.column_${process.env.TIGERSHEET_EMI_COLUMN_ID}=%22${tomorrowDateString}%22`;
+
     const { data } = await axios.get(url1);
     const tomorrowEmiDue = data.data;
 
-    // Fetch customer details in parallel
     const customerRequests = tomorrowEmiDue.map(async (emi) => {
         const customerName = emi['customer'];
         const url2 = `https://pnf-backend.vercel.app/customer?criteria=sheet_${process.env.TIGERSHEET_CUSTOMER_SHEET_ID}.column_${process.env.TIGERSHEET_CUSTOMER_COLUMN_ID}=%22${customerName}%22`;
         const { data: customerData } = await axios.get(url2);
         return customerData.data.map(customer => ({
             mobileNumber: customer['mobile number'],
-            tomorrowEmiDue: emi
+            tomorrowEmiDue: emi,
         }));
     });
 
-    const allMobileNumbersWithEmi = (await Promise.all(customerRequests)).flat();
-    return allMobileNumbersWithEmi;
+    return (await Promise.all(customerRequests)).flat();
 }
 
-async function sendMulticastMessage(messageData, tokens) {
+async function sendMulticastMessage(messageData, token) {
     try {
         const message = {
             notification: {
                 title: messageData.title,
-                body: messageData.body
+                body: messageData.body,
             },
-            token: tokens,
+            token,
             android: {
                 notification: {
-                    priority: 'high'
-                }
+                    priority: 'high',
+                },
             },
             data: {
-                screen: messageData.loanid
-            }
+                screen: messageData.loanid,
+            },
         };
 
         const response = await messaging.send(message);
@@ -203,7 +318,7 @@ async function sendMulticastMessage(messageData, tokens) {
 async function emiTomorrowPN() {
     try {
         const emiDueTomorrow = await getEmiDueTomorrow();
-        console.log(emiDueTomorrow);
+        console.log("Fetched EMI data:", emiDueTomorrow);
 
         const snapshot = await firestore.collection('customer').get();
         const tokens = new Map();
@@ -214,35 +329,35 @@ async function emiTomorrowPN() {
             tokens.set(mobile, token);
         });
 
-        // Use a Set to keep track of processed mobile numbers
         const processedMobiles = new Set();
 
-        // Send notifications in parallel
         const notificationRequests = emiDueTomorrow.map(async (emi) => {
             const mobile1 = emi.mobileNumber.slice(-10);
 
             if (processedMobiles.has(mobile1)) {
                 console.log(`Notification already sent for mobile number: ${mobile1}`);
-                return; // Skip if notification has already been sent
+                return;
             }
 
             if (tokens.has(mobile1)) {
                 const tokenToNotify = tokens.get(mobile1);
                 const notificationData = {
                     title: `Upcoming EMI for Loan ${emi.tomorrowEmiDue['loan id']}`,
-                    body: `Tomorrow is the last date for EMI Amount ₹ ${emi.tomorrowEmiDue['amount']}.`,
-                    loanid: `${emi.tomorrowEmiDue['loan id']}`
+                    body: `Tomorrow is the last date for EMI Amount ₹${emi.tomorrowEmiDue['amount']}.`,
+                    loanid: `${emi.tomorrowEmiDue['loan id']}`,
                 };
 
                 await sendMulticastMessage(notificationData, tokenToNotify);
-                processedMobiles.add(mobile1); // Mark mobile number as processed
+                processedMobiles.add(mobile1);
             }
         });
 
         await Promise.all(notificationRequests);
+        console.log('All notifications sent successfully');
     } catch (error) {
         console.error('Error:', error);
     }
 }
 
 module.exports = emiTomorrowPN;
+
