@@ -37,8 +37,18 @@ app.use('/vehicles',VehicleRoutes);
 app.use('/testloans',TestLoanRoutes);
 app.use('/tyre',TyreDataRoutes);
 app.use('/brand', BrandData);
-app.get('/api/cron',emiTomorrowPN);
-
+app.get('/api/cron', (req, res) => {
+    emiTomorrowPN();
+    res.send('Cron job executed');
+});
+cron.schedule('* * * * *', async () => {
+    try {
+        const response = await axios.get('http://localhost:4000/api/cron'); // Correct URL format
+        console.log('Cron job executed successfully:', response.data);
+    } catch (error) {
+        console.error('Error executing cron job:', error);
+    }
+});
 app.listen(Port,()=>{
     console.log(`Server is running on ${Port}`);
 });

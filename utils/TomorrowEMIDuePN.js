@@ -13,6 +13,7 @@ const firestore = admin.firestore()
 const messaging = admin.messaging();
 
 async function getemiduetomorrow() {
+  console.log("function is calling");
     const today = new Date();
     today.setDate(today.getDate()+1);
     const year = today.getFullYear();
@@ -27,7 +28,7 @@ async function getemiduetomorrow() {
     const url1 =`${process.env.BACKEND_URL}/emi?criteria=sheet_${process.env.TIGERSHEET_EMI_SHEET_ID}.column_${process.env.TIGERSHEET_EMI_COLUMN_ID}=%22${tomorrowDateString}%22`
     const res = await axios.get(url1);
     const tomorrowemidue= res.data.data;
-    // console.log(tomorrowemidue)
+    //console.log(tomorrowemidue)
 
 
     const allMobileNumbersWithEmi = [];
@@ -37,7 +38,7 @@ async function getemiduetomorrow() {
         const url2 = `${process.env.BACKEND_URL}/customer?criteria=sheet_${process.env.TIGERSHEET_CUSTOMER_SHEET_ID}.column_${process.env.TIGERSHEET_CUSTOMER_COLUMN_ID}=%22${customername}%22`;
         const res1 = await axios.get(url2);
         const customerdetails = res1.data.data;
-        // console.log("Customer Details:", customerdetails);
+        console.log("Customer Details:", customerdetails);
 
 
         // Extract mobile numbers from customerdetails
@@ -77,60 +78,13 @@ async function sendMulticastMessage(messageData, tokens) {
   
     //   const response = await messaging.sendMulticast(message);
       const response = await messaging.send(message);
-    //   console.log('Successfully sent message:', response);
+    console.log('Successfully sent message:', response);
       return response;
     } catch (error) {
       console.error('Error sending message:', error);
       throw error; 
     }
   }
-
-// async function main() {
-//     try {
-//        const emitomorrowdue = await getemiduetomorrow();
-//        console.log(emitomorrowdue);
-//       // Retrieve tokens from Firestore
-//       const snapshot = await firestore.collection('customer').get();
-//       const tokens = [];
-//       const mobileNumberFirestore = []
-  
-//       snapshot.forEach(doc => {
-//         const mobile =doc.id
-//         const token = doc.data().token;
-//         tokens.push(token);
-//         mobileNumberFirestore.push(mobile);
-//       });
-//       console.log(mobileNumberFirestore);
-//       const mobileNumbersToNotify = [];
-//       for (const emi of emitomorrowdue) {
-//           const modifiedMobileNumber = emi.mobileNumber.slice(-10);
-//           if (mobileNumberFirestore.indexOf(modifiedMobileNumber) !== -1) {
-//               mobileNumbersToNotify.push(modifiedMobileNumber);
-//               console.log(mobileNumbersToNotify);
-              
-//                 // Extract tokens for mobile numbers to notify
-//                 const tokensToNotify = mobileNumbersToNotify.map(mobileNumber => {
-//                     const index = mobileNumberFirestore.indexOf(mobileNumber);
-//                     return tokens[index];
-//                 });
-//                 console.log(tokensToNotify);
-//               // Construct notification data for tomorrow's upcoming EMIs
-//               const notificationData = {
-//                 title: `Upcoming EMI for Loan ${emi.tomorrowEmiDue['loan id']}`,
-//                 body: `Tomorrow is the last date for EMI Amount ₹ ${emi.tomorrowEmiDue['amount']}.`
-//               };
-        
-//             //   console.log(tokensToSend);
-          
-//               // Send multicast message
-//               await sendMulticastMessage(notificationData, tokensToNotify);
-//           }
-//       }
-//     } catch (error) {
-//       console.error('Error:', error);
-//     }
-// }
-
 async function emiTomorrowPN() {
     try {
         const emitomorrowdue = await getemiduetomorrow();
