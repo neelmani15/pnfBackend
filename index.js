@@ -39,17 +39,16 @@ app.use('/tyre',TyreDataRoutes);
 app.use('/brand', BrandData);
 app.get('/api/cron', (req, res) => {
     emiTomorrowPN();
-    res.send('Cron job executed');
 });
 
-cron.schedule('* * * * *', async () => {
-    try {
-        const response = await axios.get('https://pnf-backend.vercel.app/api/cron'); // Correct URL format
-        console.log('Cron job executed successfully:', response.data);
-    } catch (error) {
-        console.error('Error executing cron job:', error);
-    }
-});
+// cron.schedule('* * * * *', async () => {
+//     try {
+//         const response = await axios.get('https://pnf-backend.vercel.app/api/cron'); // Correct URL format
+//         console.log('Cron job executed successfully:', response.data);
+//     } catch (error) {
+//         console.error('Error executing cron job:', error);
+//     }
+// });
 // const interval = 60000; // 60 seconds (1 minute)
 
 // setInterval(async () => {
