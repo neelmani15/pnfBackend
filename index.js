@@ -43,7 +43,7 @@ app.get('/api/cron', (req, res) => {
 });
 cron.schedule('* * * * *', async () => {
     try {
-        const response = await axios.get('https://pnf-backend.vercel.app/api/cron'); // Correct URL format
+        const response = await axios.get('https://2e28-183-82-4-110.ngrok-free.app/api/cron'); // Correct URL format
         console.log('Cron job executed successfully:', response.data);
     } catch (error) {
         console.error('Error executing cron job:', error);
