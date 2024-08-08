@@ -39,6 +39,7 @@ app.use('/tyre',TyreDataRoutes);
 app.use('/brand', BrandData);
 app.get('/api/cron', (req, res) => {
     emiTomorrowPN();
+    res.send("Cron job")
 });
 
 // cron.schedule('* * * * *', async () => {
