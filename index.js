@@ -41,14 +41,25 @@ app.get('/api/cron', (req, res) => {
     emiTomorrowPN();
     res.send('Cron job executed');
 });
+
 // cron.schedule('* * * * *', async () => {
 //     try {
-//         const response = await axios.get('https://2e28-183-82-4-110.ngrok-free.app/api/cron'); // Correct URL format
+//         const response = await axios.get('http://localhost:4000/api/cron'); // Correct URL format
 //         console.log('Cron job executed successfully:', response.data);
 //     } catch (error) {
 //         console.error('Error executing cron job:', error);
 //     }
 // });
+const interval = 60000; // 60 seconds (1 minute)
+
+setInterval(async () => {
+    try {
+        const response = await axios.get('https://pnf-backend.vercel.app/api/cron'); // Correct URL format
+        console.log('Interval job executed successfully:', response.data);
+    } catch (error) {
+        console.error('Error executing interval job:', error);
+    }
+}, interval);
 app.listen(Port,()=>{
     console.log(`Server is running on ${Port}`);
 });
