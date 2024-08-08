@@ -155,9 +155,9 @@ async function getEmiDueTomorrow() {
     const tomorrowDateString = `${year}-${month < 10 ? '0' : ''}${month}-${day < 10 ? '0' : ''}${day}`;
 
     const url1 = `https://pnf-backend.vercel.app/emi?criteria=sheet_${process.env.TIGERSHEET_EMI_SHEET_ID}.column_${process.env.TIGERSHEET_EMI_COLUMN_ID}=%22${tomorrowDateString}%22`;
-    const { data } = await axios.get(url1);
+    const { data } = await axios.get(url1);  // Corrected line
     const tomorrowEmiDue = data.data;
-    console.log(res.data)
+    console.log(tomorrowEmiDue); // Corrected line
 
     // Fetch customer details in parallel
     const customerRequests = tomorrowEmiDue.map(async (emi) => {
@@ -247,6 +247,7 @@ async function emiTomorrowPN() {
 }
 
 module.exports = emiTomorrowPN;
+
 // const axios = require('axios');
 // const admin = require('firebase-admin');
 // const dotenv = require('dotenv');
