@@ -270,19 +270,22 @@ async function getEmiDueTomorrow() {
     const day = today.getDate();
 
     const tomorrowDateString = `${year}-${month < 10 ? '0' : ''}${month}-${day < 10 ? '0' : ''}${day}`;
-    const url1 = `https://pnf-backend.vercel.app/emi?criteria=sheet_${process.env.TIGERSHEET_EMI_SHEET_ID}.column_${process.env.TIGERSHEET_EMI_COLUMN_ID}=%22${tomorrowDateString}%22`;
+    const url1 = `https://pnf-backend.vercel.app/emi?criteria=sheet_26521917.column_36=%22${tomorrowDateString}%22`;
 
     const { data } = await axios.get(url1);
     const tomorrowEmiDue = data.data;
+    console.log("dfsdf",tomorrowEmiDue.length);
 
     const customerRequests = tomorrowEmiDue.map(async (emi) => {
         const customerName = emi['customer'];
-        const url2 = `https://pnf-backend.vercel.app/customer?criteria=sheet_${process.env.TIGERSHEET_CUSTOMER_SHEET_ID}.column_${process.env.TIGERSHEET_CUSTOMER_COLUMN_ID}=%22${customerName}%22`;
+        const url2 = `https://pnf-backend.vercel.app/customer?criteria=sheet_95100183.column_23=%22${customerName}%22`;
         const { data: customerData } = await axios.get(url2);
+        console.log("Customer", customerData.data.length)
         return customerData.data.map(customer => ({
             mobileNumber: customer['mobile number'],
             tomorrowEmiDue: emi,
         }));
+       
     });
 
     return (await Promise.all(customerRequests)).flat();
@@ -318,7 +321,7 @@ async function sendMulticastMessage(messageData, token) {
 async function emiTomorrowPN() {
     try {
         const emiDueTomorrow = await getEmiDueTomorrow();
-        console.log("Fetched EMI data:", emiDueTomorrow);
+        console.log("Fetched EMI data:", emiDueTomorrow.length);
 
         const snapshot = await firestore.collection('customer').get();
         const tokens = new Map();
