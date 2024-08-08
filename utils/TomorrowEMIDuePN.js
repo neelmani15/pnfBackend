@@ -25,7 +25,7 @@ async function getemiduetomorrow() {
 
 
     // console.log("Tomorrow's date:", String(tomorrowDateString));
-    const url1 =`${process.env.BACKEND_URL}/emi?criteria=sheet_${process.env.TIGERSHEET_EMI_SHEET_ID}.column_${process.env.TIGERSHEET_EMI_COLUMN_ID}=%22${tomorrowDateString}%22`
+    const url1 =`https://pnf-backend.vercel.app/emi?criteria=sheet_${process.env.TIGERSHEET_EMI_SHEET_ID}.column_${process.env.TIGERSHEET_EMI_COLUMN_ID}=%22${tomorrowDateString}%22`
     const res = await axios.get(url1);
     const tomorrowemidue= res.data.data;
     //console.log(tomorrowemidue)
@@ -35,7 +35,7 @@ async function getemiduetomorrow() {
     for (const emi of tomorrowemidue) {
         const customername = emi['customer'];
         // console.log("Customer Name:", customername);
-        const url2 = `${process.env.BACKEND_URL}/customer?criteria=sheet_${process.env.TIGERSHEET_CUSTOMER_SHEET_ID}.column_${process.env.TIGERSHEET_CUSTOMER_COLUMN_ID}=%22${customername}%22`;
+        const url2 = `https://pnf-backend.vercel.app/customer?criteria=sheet_${process.env.TIGERSHEET_CUSTOMER_SHEET_ID}.column_${process.env.TIGERSHEET_CUSTOMER_COLUMN_ID}=%22${customername}%22`;
         const res1 = await axios.get(url2);
         const customerdetails = res1.data.data;
         console.log("Customer Details:", customerdetails);
