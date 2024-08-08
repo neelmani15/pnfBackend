@@ -264,6 +264,8 @@ const messaging = admin.messaging();
 async function getEmiDueTomorrow() {
     console.log("Fetching EMI due tomorrow...");
     const today = new Date();
+    let emiApiResponseCount = 0;
+    let customerApiResponseCount = 0;
     today.setDate(today.getDate() + 1);
     const year = today.getFullYear();
     const month = today.getMonth() + 1;
@@ -274,16 +276,21 @@ async function getEmiDueTomorrow() {
 
     const { data } = await axios.get(url1);
     const tomorrowEmiDue = data.data;
+    emiApiResponseCount++;
+  
 
     const customerRequests = tomorrowEmiDue.map(async (emi) => {
         const customerName = emi['customer'];
         const url2 = `https://pnf-backend.vercel.app/customer?criteria=sheet_${process.env.TIGERSHEET_CUSTOMER_SHEET_ID}.column_${process.env.TIGERSHEET_CUSTOMER_COLUMN_ID}=%22${customerName}%22`;
         const { data: customerData } = await axios.get(url2);
+        customerApiResponseCount++; 
         return customerData.data.map(customer => ({
             mobileNumber: customer['mobile number'],
             tomorrowEmiDue: emi,
         }));
     });
+    // console.log(`Number of EMI API responses: ${emiApiResponseCount}`);
+    // console.log(`Number of Customer API responses: ${customerApiResponseCount}`);
 
     return (await Promise.all(customerRequests)).flat();
 }
