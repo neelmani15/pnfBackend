@@ -51,16 +51,6 @@ app.get('/api/cron', (req, res) => {
 //     }
 // });
 
-// const interval = 60000; // 60 seconds (1 minute)
-
-// setInterval(async () => {
-//     try {
-//         const response = await axios.get('https://pnf-backend.vercel.app/api/cron'); // Correct URL format
-//         console.log('Interval job executed successfully:', response.data);
-//     } catch (error) {
-//         console.error('Error executing interval job:', error);
-//     }
-// }, interval);
 app.listen(Port,()=>{
     console.log(`Server is running on ${Port}`);
 });

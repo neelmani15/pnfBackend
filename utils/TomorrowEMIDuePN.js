@@ -261,91 +261,34 @@ admin.initializeApp({
 const firestore = admin.firestore();
 const messaging = admin.messaging();
 
-// async function getEmiDueTomorrow() {
-//     console.log("Fetching EMI due tomorrow...");
-//     const today = new Date();
-//     today.setDate(today.getDate() + 1);
-//     const year = today.getFullYear();
-//     const month = today.getMonth() + 1;
-//     const day = today.getDate();
-
-//     const tomorrowDateString = `${year}-${month < 10 ? '0' : ''}${month}-${day < 10 ? '0' : ''}${day}`;
-//     const url1 = `https://pnf-backend.vercel.app/emi?criteria=sheet_26521917.column_36=%22${tomorrowDateString}%22`;
-
-//     const { data } = await axios.get(url1);
-//     const tomorrowEmiDue = data.data;
-//     console.log("dfsdf",tomorrowEmiDue.length);
-
-//     const customerRequests = tomorrowEmiDue.map(async (emi) => {
-//         const customerName = emi['customer'];
-//         const url2 = `https://pnf-backend.vercel.app/customer?criteria=sheet_95100183.column_23=%22${customerName}%22`;
-//         const { data: customerData } = await axios.get(url2);
-//         console.log("Customer", customerData.data.length)
-//         return customerData.data.map(customer => ({
-//             mobileNumber: customer['mobile number'],
-//             tomorrowEmiDue: emi,
-//         }));
-       
-//     });
-
-//     return (await Promise.all(customerRequests)).flat();
-// }
 async function getEmiDueTomorrow() {
-  console.log("Fetching EMI due tomorrow...");
-  const today = new Date();
-  today.setDate(today.getDate() + 1);
-  const year = today.getFullYear();
-  const month = today.getMonth() + 1;
-  const day = today.getDate();
+    console.log("Fetching EMI due tomorrow...");
+    const today = new Date();
+    today.setDate(today.getDate() + 1);
+    const year = today.getFullYear();
+    const month = today.getMonth() + 1;
+    const day = today.getDate();
 
-  const tomorrowDateString = `${year}-${month < 10 ? '0' : ''}${month}-${day < 10 ? '0' : ''}${day}`;
-  const criteria = `sheet_26521917.column_36="${tomorrowDateString}"`;
+    const tomorrowDateString = `${year}-${month < 10 ? '0' : ''}${month}-${day < 10 ? '0' : ''}${day}`;
+    const url1 = `https://pnf-backend.vercel.app/emi?criteria=sheet_26521917.column_36=%22${tomorrowDateString}%22`;
 
-  // Use the TigerSheet API URL and authorization
-  const url = process.env.TIGERSHEET_API_URL;
-  const headers = {
-      'Authorization': process.env.TIGERSHEET_AUTHORIZATION_TOKEN,
-      'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
-  };
-  const sheetId = 26521917;
+    const { data } = await axios.get(url1);
+    const tomorrowEmiDue = data.data;
+    console.log("dfsdf",tomorrowEmiDue.length);
 
-  const emiRecords = await getEmiRecords(url, headers, sheetId, criteria);
-  console.log("EMI records count:", emiRecords);
+    const customerRequests = tomorrowEmiDue.map(async (emi) => {
+        const customerName = emi['customer'];
+        const url2 = `https://pnf-backend.vercel.app/customer?criteria=sheet_95100183.column_23=%22${customerName}%22`;
+        const { data: customerData } = await axios.get(url2);
+        console.log("Customer", customerData.data.length)
+        return customerData.data.map(customer => ({
+            mobileNumber: customer['mobile number'],
+            tomorrowEmiDue: emi,
+        }));
+       
+    });
 
-  const customerRequests = emiRecords.map(async (emi) => {
-      const customerName = emi['customer'];
-      const customerCriteria = `sheet_95100183.column_23="${customerName}"`;
-      const sheet = 95100183
-      const customerData = await getCustomerData(url, headers, sheet, customerCriteria);
-      console.log("Customer data count:", customerData.length);
-
-      return customerData.map(customer => ({
-          mobileNumber: customer['mobile number'],
-          tomorrowEmiDue: emi,
-      }));
-  });
-
-  return (await Promise.all(customerRequests)).flat();
-}
-
-async function getEmiRecords(url, headers, sheetId, criteria) {
-  try {
-      const response = await axios.post(url, `sheet_id=${sheetId}&criteria=${encodeURIComponent(criteria)}`, { headers });
-      return response.data.data;
-  } catch (err) {
-      console.error('Error in fetching EMI records:', err.message);
-      throw err;
-  }
-}
-
-async function getCustomerData(url, headers, sheetId, criteria) {
-  try {
-      const response = await axios.post(url, `sheet_id=${sheetId}&criteria=${encodeURIComponent(criteria)}`, { headers });
-      return response.data.data;
-  } catch (err) {
-      console.error('Error in fetching customer data:', err.message);
-      throw err;
-  }
+    return (await Promise.all(customerRequests)).flat();
 }
 
 async function sendMulticastMessage(messageData, token) {
@@ -378,7 +321,7 @@ async function sendMulticastMessage(messageData, token) {
 async function emiTomorrowPN() {
     try {
         const emiDueTomorrow = await getEmiDueTomorrow();
-        console.log("Fetched EMI data:", emiDueTomorrow);
+        console.log("Fetched EMI data:", emiDueTomorrow.length);
 
         const snapshot = await firestore.collection('customer').get();
         const tokens = new Map();
