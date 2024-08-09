@@ -130,123 +130,237 @@
 //   }
 // //  emiTomorrowPN()
 //   module.exports = emiTomorrowPN;
-// const axios = require('axios');
-// const admin = require('firebase-admin');
-// const serviceAccount = require('../pnffrontend-firebase-adminsdk-wbif2-daf8b85b61.json');
-// const dotenv = require('dotenv');
+// // const axios = require('axios');
+// // const admin = require('firebase-admin');
+// // const serviceAccount = require('../pnffrontend-firebase-adminsdk-wbif2-daf8b85b61.json');
+// // const dotenv = require('dotenv');
 
-// dotenv.config();
+// // dotenv.config();
 
-// admin.initializeApp({
-//     credential: admin.credential.cert(serviceAccount)
-// });
+// // admin.initializeApp({
+// //     credential: admin.credential.cert(serviceAccount)
+// // });
 
-// const firestore = admin.firestore();
-// const messaging = admin.messaging();
+// // const firestore = admin.firestore();
+// // const messaging = admin.messaging();
 
-// async function getEmiDueTomorrow() {
-//     console.log("Function is calling");
-//     const today = new Date();
-//     today.setDate(today.getDate() + 1);
-//     const year = today.getFullYear();
-//     const month = today.getMonth() + 1;
-//     const day = today.getDate();
+// // async function getEmiDueTomorrow() {
+// //     console.log("Function is calling");
+// //     const today = new Date();
+// //     today.setDate(today.getDate() + 1);
+// //     const year = today.getFullYear();
+// //     const month = today.getMonth() + 1;
+// //     const day = today.getDate();
 
-//     const tomorrowDateString = `${year}-${month < 10 ? '0' : ''}${month}-${day < 10 ? '0' : ''}${day}`;
+// //     const tomorrowDateString = `${year}-${month < 10 ? '0' : ''}${month}-${day < 10 ? '0' : ''}${day}`;
 
-//     const url1 = `https://pnf-backend.vercel.app/emi?criteria=sheet_${process.env.TIGERSHEET_EMI_SHEET_ID}.column_${process.env.TIGERSHEET_EMI_COLUMN_ID}=%22${tomorrowDateString}%22`;
-//     const { data } = await axios.get(url1);
-//     const tomorrowEmiDue = data.data;
-//     console.log(res.data)
+// //     const url1 = `https://pnf-backend.vercel.app/emi?criteria=sheet_${process.env.TIGERSHEET_EMI_SHEET_ID}.column_${process.env.TIGERSHEET_EMI_COLUMN_ID}=%22${tomorrowDateString}%22`;
+// //     const { data } = await axios.get(url1);
+// //     const tomorrowEmiDue = data.data;
+// //     console.log(res.data)
 
-//     // Fetch customer details in parallel
-//     const customerRequests = tomorrowEmiDue.map(async (emi) => {
-//         const customerName = emi['customer'];
-//         const url2 = `https://pnf-backend.vercel.app/customer?criteria=sheet_${process.env.TIGERSHEET_CUSTOMER_SHEET_ID}.column_${process.env.TIGERSHEET_CUSTOMER_COLUMN_ID}=%22${customerName}%22`;
-//         const { data: customerData } = await axios.get(url2);
-//         return customerData.data.map(customer => ({
-//             mobileNumber: customer['mobile number'],
-//             tomorrowEmiDue: emi
-//         }));
-//     });
+// //     // Fetch customer details in parallel
+// //     const customerRequests = tomorrowEmiDue.map(async (emi) => {
+// //         const customerName = emi['customer'];
+// //         const url2 = `https://pnf-backend.vercel.app/customer?criteria=sheet_${process.env.TIGERSHEET_CUSTOMER_SHEET_ID}.column_${process.env.TIGERSHEET_CUSTOMER_COLUMN_ID}=%22${customerName}%22`;
+// //         const { data: customerData } = await axios.get(url2);
+// //         return customerData.data.map(customer => ({
+// //             mobileNumber: customer['mobile number'],
+// //             tomorrowEmiDue: emi
+// //         }));
+// //     });
 
-//     const allMobileNumbersWithEmi = (await Promise.all(customerRequests)).flat();
-//     return allMobileNumbersWithEmi;
-// }
+// //     const allMobileNumbersWithEmi = (await Promise.all(customerRequests)).flat();
+// //     return allMobileNumbersWithEmi;
+// // }
 
-// async function sendMulticastMessage(messageData, tokens) {
-//     try {
-//         const message = {
-//             notification: {
-//                 title: messageData.title,
-//                 body: messageData.body
-//             },
-//             token: tokens,
-//             android: {
-//                 notification: {
-//                     priority: 'high'
-//                 }
-//             },
-//             data: {
-//                 screen: messageData.loanid
-//             }
-//         };
+// // async function sendMulticastMessage(messageData, tokens) {
+// //     try {
+// //         const message = {
+// //             notification: {
+// //                 title: messageData.title,
+// //                 body: messageData.body
+// //             },
+// //             token: tokens,
+// //             android: {
+// //                 notification: {
+// //                     priority: 'high'
+// //                 }
+// //             },
+// //             data: {
+// //                 screen: messageData.loanid
+// //             }
+// //         };
 
-//         const response = await messaging.send(message);
-//         console.log('Successfully sent message:', response);
-//         return response;
-//     } catch (error) {
-//         console.error('Error sending message:', error);
-//         throw error;
-//     }
-// }
+// //         const response = await messaging.send(message);
+// //         console.log('Successfully sent message:', response);
+// //         return response;
+// //     } catch (error) {
+// //         console.error('Error sending message:', error);
+// //         throw error;
+// //     }
+// // }
 
-// async function emiTomorrowPN() {
-//     try {
-//         const emiDueTomorrow = await getEmiDueTomorrow();
-//         console.log(emiDueTomorrow);
+// // async function emiTomorrowPN() {
+// //     try {
+// //         const emiDueTomorrow = await getEmiDueTomorrow();
+// //         console.log(emiDueTomorrow);
 
-//         const snapshot = await firestore.collection('customer').get();
-//         const tokens = new Map();
+// //         const snapshot = await firestore.collection('customer').get();
+// //         const tokens = new Map();
 
-//         snapshot.forEach(doc => {
-//             const mobile = doc.id.slice(-10); // Assuming doc.id contains the full mobile number
-//             const token = doc.data().token;
-//             tokens.set(mobile, token);
-//         });
+// //         snapshot.forEach(doc => {
+// //             const mobile = doc.id.slice(-10); // Assuming doc.id contains the full mobile number
+// //             const token = doc.data().token;
+// //             tokens.set(mobile, token);
+// //         });
 
-//         // Use a Set to keep track of processed mobile numbers
-//         const processedMobiles = new Set();
+// //         // Use a Set to keep track of processed mobile numbers
+// //         const processedMobiles = new Set();
 
-//         // Send notifications in parallel
-//         const notificationRequests = emiDueTomorrow.map(async (emi) => {
-//             const mobile1 = emi.mobileNumber.slice(-10);
+// //         // Send notifications in parallel
+// //         const notificationRequests = emiDueTomorrow.map(async (emi) => {
+// //             const mobile1 = emi.mobileNumber.slice(-10);
 
-//             if (processedMobiles.has(mobile1)) {
-//                 console.log(`Notification already sent for mobile number: ${mobile1}`);
-//                 return; // Skip if notification has already been sent
-//             }
+// //             if (processedMobiles.has(mobile1)) {
+// //                 console.log(`Notification already sent for mobile number: ${mobile1}`);
+// //                 return; // Skip if notification has already been sent
+// //             }
 
-//             if (tokens.has(mobile1)) {
-//                 const tokenToNotify = tokens.get(mobile1);
-//                 const notificationData = {
-//                     title: `Upcoming EMI for Loan ${emi.tomorrowEmiDue['loan id']}`,
-//                     body: `Tomorrow is the last date for EMI Amount ₹ ${emi.tomorrowEmiDue['amount']}.`,
-//                     loanid: `${emi.tomorrowEmiDue['loan id']}`
-//                 };
+// //             if (tokens.has(mobile1)) {
+// //                 const tokenToNotify = tokens.get(mobile1);
+// //                 const notificationData = {
+// //                     title: `Upcoming EMI for Loan ${emi.tomorrowEmiDue['loan id']}`,
+// //                     body: `Tomorrow is the last date for EMI Amount ₹ ${emi.tomorrowEmiDue['amount']}.`,
+// //                     loanid: `${emi.tomorrowEmiDue['loan id']}`
+// //                 };
 
-//                 await sendMulticastMessage(notificationData, tokenToNotify);
-//                 processedMobiles.add(mobile1); // Mark mobile number as processed
-//             }
-//         });
+// //                 await sendMulticastMessage(notificationData, tokenToNotify);
+// //                 processedMobiles.add(mobile1); // Mark mobile number as processed
+// //             }
+// //         });
 
-//         await Promise.all(notificationRequests);
-//     } catch (error) {
-//         console.error('Error:', error);
-//     }
-// }
+// //         await Promise.all(notificationRequests);
+// //     } catch (error) {
+// //         console.error('Error:', error);
+// //     }
+// // }
 
-// module.exports = emiTomorrowPN;
+// // module.exports = emiTomorrowPN;
+// // const axios = require('axios');
+// // const admin = require('firebase-admin');
+// // const dotenv = require('dotenv');
+// // const serviceAccount = require('../pnffrontend-firebase-adminsdk-wbif2-daf8b85b61.json');
+
+// // dotenv.config();
+
+// // admin.initializeApp({
+// //     credential: admin.credential.cert(serviceAccount),
+// // });
+
+// // const firestore = admin.firestore();
+// // const messaging = admin.messaging();
+
+// // async function getEmiDueTomorrow() {
+// //     console.log("Fetching EMI due tomorrow...");
+// //     const today = new Date();
+// //     today.setDate(today.getDate() + 1);
+// //     const year = today.getFullYear();
+// //     const month = today.getMonth() + 1;
+// //     const day = today.getDate();
+
+// //     const tomorrowDateString = `${year}-${month < 10 ? '0' : ''}${month}-${day < 10 ? '0' : ''}${day}`;
+// //     const url1 = `https://pnf-backend.vercel.app/emi?criteria=sheet_${process.env.TIGERSHEET_EMI_SHEET_ID}.column_${process.env.TIGERSHEET_EMI_COLUMN_ID}=%22${tomorrowDateString}%22`;
+
+// //     const { data } = await axios.get(url1);
+// //     const tomorrowEmiDue = data.data;
+
+// //     const customerRequests = tomorrowEmiDue.map(async (emi) => {
+// //         const customerName = emi['customer'];
+// //         const url2 = `https://pnf-backend.vercel.app/customer?criteria=sheet_${process.env.TIGERSHEET_CUSTOMER_SHEET_ID}.column_${process.env.TIGERSHEET_CUSTOMER_COLUMN_ID}=%22${customerName}%22`;
+// //         const { data: customerData } = await axios.get(url2);
+// //         return customerData.data.map(customer => ({
+// //             mobileNumber: customer['mobile number'],
+// //             tomorrowEmiDue: emi,
+// //         }));
+// //     });
+
+// //     return (await Promise.all(customerRequests)).flat();
+// // }
+
+// // async function sendMulticastMessage(messageData, token) {
+// //     try {
+// //         const message = {
+// //             notification: {
+// //                 title: messageData.title,
+// //                 body: messageData.body,
+// //             },
+// //             token,
+// //             android: {
+// //                 notification: {
+// //                     priority: 'high',
+// //                 },
+// //             },
+// //             data: {
+// //                 screen: messageData.loanid,
+// //             },
+// //         };
+
+// //         const response = await messaging.send(message);
+// //         console.log('Successfully sent message:', response);
+// //         return response;
+// //     } catch (error) {
+// //         console.error('Error sending message:', error);
+// //         throw error;
+// //     }
+// // }
+
+// // async function emiTomorrowPN() {
+// //     try {
+// //         const emiDueTomorrow = await getEmiDueTomorrow();
+// //         console.log("Fetched EMI data:", emiDueTomorrow);
+
+// //         const snapshot = await firestore.collection('customer').get();
+// //         const tokens = new Map();
+
+// //         snapshot.forEach(doc => {
+// //             const mobile = doc.id.slice(-10); // Assuming doc.id contains the full mobile number
+// //             const token = doc.data().token;
+// //             tokens.set(mobile, token);
+// //         });
+
+// //         const processedMobiles = new Set();
+
+// //         const notificationRequests = emiDueTomorrow.map(async (emi) => {
+// //             const mobile1 = emi.mobileNumber.slice(-10);
+
+// //             if (processedMobiles.has(mobile1)) {
+// //                 console.log(`Notification already sent for mobile number: ${mobile1}`);
+// //                 return;
+// //             }
+
+// //             if (tokens.has(mobile1)) {
+// //                 const tokenToNotify = tokens.get(mobile1);
+// //                 const notificationData = {
+// //                     title: `Upcoming EMI for Loan ${emi.tomorrowEmiDue['loan id']}`,
+// //                     body: `Tomorrow is the last date for EMI Amount ₹${emi.tomorrowEmiDue['amount']}.`,
+// //                     loanid: `${emi.tomorrowEmiDue['loan id']}`,
+// //                 };
+
+// //                 await sendMulticastMessage(notificationData, tokenToNotify);
+// //                 processedMobiles.add(mobile1);
+// //             }
+// //         });
+
+// //         await Promise.all(notificationRequests);
+// //         console.log('All notifications sent successfully');
+// //     } catch (error) {
+// //         console.error('Error:', error);
+// //     }
+// // }
+
+// // module.exports = emiTomorrowPN;
+
 const axios = require('axios');
 const admin = require('firebase-admin');
 const dotenv = require('dotenv');
@@ -261,34 +375,91 @@ admin.initializeApp({
 const firestore = admin.firestore();
 const messaging = admin.messaging();
 
-async function getEmiDueTomorrow() {
-    console.log("Fetching EMI due tomorrow...");
-    const today = new Date();
-    today.setDate(today.getDate() + 1);
-    const year = today.getFullYear();
-    const month = today.getMonth() + 1;
-    const day = today.getDate();
+// async function getEmiDueTomorrow() {
+//     console.log("Fetching EMI due tomorrow...");
+//     const today = new Date();
+//     today.setDate(today.getDate() + 1);
+//     const year = today.getFullYear();
+//     const month = today.getMonth() + 1;
+//     const day = today.getDate();
 
-    const tomorrowDateString = `${year}-${month < 10 ? '0' : ''}${month}-${day < 10 ? '0' : ''}${day}`;
-    const url1 = `https://pnf-backend.vercel.app/emi?criteria=sheet_26521917.column_36=%22${tomorrowDateString}%22`;
+//     const tomorrowDateString = `${year}-${month < 10 ? '0' : ''}${month}-${day < 10 ? '0' : ''}${day}`;
+//     const url1 = `https://pnf-backend.vercel.app/emi?criteria=sheet_26521917.column_36=%22${tomorrowDateString}%22`;
 
-    const { data } = await axios.get(url1);
-    const tomorrowEmiDue = data.data;
-    console.log("dfsdf",tomorrowEmiDue.length);
+//     const { data } = await axios.get(url1);
+//     const tomorrowEmiDue = data.data;
+//     console.log("dfsdf",tomorrowEmiDue.length);
 
-    const customerRequests = tomorrowEmiDue.map(async (emi) => {
-        const customerName = emi['customer'];
-        const url2 = `https://pnf-backend.vercel.app/customer?criteria=sheet_95100183.column_23=%22${customerName}%22`;
-        const { data: customerData } = await axios.get(url2);
-        console.log("Customer", customerData.data.length)
-        return customerData.data.map(customer => ({
-            mobileNumber: customer['mobile number'],
-            tomorrowEmiDue: emi,
-        }));
+//     const customerRequests = tomorrowEmiDue.map(async (emi) => {
+//         const customerName = emi['customer'];
+//         const url2 = `https://pnf-backend.vercel.app/customer?criteria=sheet_95100183.column_23=%22${customerName}%22`;
+//         const { data: customerData } = await axios.get(url2);
+//         console.log("Customer", customerData.data.length)
+//         return customerData.data.map(customer => ({
+//             mobileNumber: customer['mobile number'],
+//             tomorrowEmiDue: emi,
+//         }));
        
-    });
+//     });
 
-    return (await Promise.all(customerRequests)).flat();
+//     return (await Promise.all(customerRequests)).flat();
+// }
+async function getEmiDueTomorrow() {
+  console.log("Fetching EMI due tomorrow...");
+  const today = new Date();
+  today.setDate(today.getDate() + 1);
+  const year = today.getFullYear();
+  const month = today.getMonth() + 1;
+  const day = today.getDate();
+
+  const tomorrowDateString = `${year}-${month < 10 ? '0' : ''}${month}-${day < 10 ? '0' : ''}${day}`;
+  const criteria = `sheet_26521917.column_36="${tomorrowDateString}"`;
+
+  // Use the TigerSheet API URL and authorization
+  const url = process.env.TIGERSHEET_API_URL;
+  const headers = {
+      'Authorization': process.env.TIGERSHEET_AUTHORIZATION_TOKEN,
+      'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
+  };
+  const sheetId = 26521917;
+
+  const emiRecords = await getEmiRecords(url, headers, sheetId, criteria);
+  console.log("EMI records count:", emiRecords);
+
+  const customerRequests = emiRecords.map(async (emi) => {
+      const customerName = emi['customer'];
+      const customerCriteria = `sheet_95100183.column_23="${customerName}"`;
+      const sheet = 95100183
+      const customerData = await getCustomerData(url, headers, sheet, customerCriteria);
+      console.log("Customer data count:", customerData.length);
+
+      return customerData.map(customer => ({
+          mobileNumber: customer['mobile number'],
+          tomorrowEmiDue: emi,
+      }));
+  });
+
+  return (await Promise.all(customerRequests)).flat();
+}
+
+async function getEmiRecords(url, headers, sheetId, criteria) {
+  try {
+      const response = await axios.post(url, `sheet_id=${sheetId}&criteria=${encodeURIComponent(criteria)}`, { headers });
+      return response.data.data;
+  } catch (err) {
+      console.error('Error in fetching EMI records:', err.message);
+      throw err;
+  }
+}
+
+async function getCustomerData(url, headers, sheetId, criteria) {
+  try {
+      const response = await axios.post(url, `sheet_id=${sheetId}&criteria=${encodeURIComponent(criteria)}`, { headers });
+      return response.data.data;
+  } catch (err) {
+      console.error('Error in fetching customer data:', err.message);
+      throw err;
+  }
 }
 
 async function sendMulticastMessage(messageData, token) {
@@ -321,7 +492,7 @@ async function sendMulticastMessage(messageData, token) {
 async function emiTomorrowPN() {
     try {
         const emiDueTomorrow = await getEmiDueTomorrow();
-        console.log("Fetched EMI data:", emiDueTomorrow.length);
+        console.log("Fetched EMI data:", emiDueTomorrow);
 
         const snapshot = await firestore.collection('customer').get();
         const tokens = new Map();
@@ -363,4 +534,10 @@ async function emiTomorrowPN() {
 }
 
 module.exports = emiTomorrowPN;
+
+
+
+
+
+
 
