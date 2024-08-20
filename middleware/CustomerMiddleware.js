@@ -47,20 +47,24 @@ const CustomerValidation = async (req, res) => {
         
         // Get and clean the verifyValue from request query parameters
         const cleanedValue = req.query.verifyValue || '';
-        //console.log('Original Value:', cleanedValue);
+        console.log('Original Value:', cleanedValue);
         
         // Function to format the mobile number with +91 prefix if needed
         const formatMobileNumber = (number) => {
-            let cleanedNumber = number.replace(/\D/g, ''); // Remove any non-digit characters
+            console.log("smnbchk", number);
+            let cleanedNumber = number; 
+            //console.log("akdsi", cleanedNumber)
             
             if (cleanedNumber.length === 10) {
                 cleanedNumber = `+91${cleanedNumber}`;
-            } else if (cleanedNumber.startsWith('91') && cleanedNumber.length === 12) {
+            }else if (cleanedNumber.length === 11 && cleanedNumber.startsWith('0')) {
+                cleanedNumber = `+91${cleanedNumber.slice(1, 6)}`;
+            }else if (cleanedNumber.startsWith('91') && cleanedNumber.length === 12) {
                 cleanedNumber = `+${cleanedNumber}`;
             } else if (!cleanedNumber.startsWith('+91')) {
                 cleanedNumber = `+91${cleanedNumber}`;
             }
-
+            console.log(cleanedNumber)
             return cleanedNumber;
         };
         const fetchTruckRecords = async (value) => {

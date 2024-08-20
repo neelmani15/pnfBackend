@@ -364,7 +364,7 @@
 const axios = require('axios');
 const admin = require('firebase-admin');
 const dotenv = require('dotenv');
-const serviceAccount = require('../pnffrontend-firebase-adminsdk-wbif2-daf8b85b61.json');
+var serviceAccount = require('../pnffrontend-firebase-adminsdk-wbif2-daf8b85b61.json');
 
 dotenv.config();
 
@@ -405,7 +405,7 @@ const messaging = admin.messaging();
 //     return (await Promise.all(customerRequests)).flat();
 // }
 async function getEmiDueTomorrow() {
-  console.log("Fetching EMI due tomorrow...");
+  //console.log("Fetching EMI due tomorrow...");
   const today = new Date();
   today.setDate(today.getDate() + 1);
   const year = today.getFullYear();
@@ -507,6 +507,7 @@ async function emiTomorrowPN() {
 
         const notificationRequests = emiDueTomorrow.map(async (emi) => {
             const mobile1 = emi.mobileNumber.slice(-10);
+            //console.log("mobile number from firebase", mobile1)
 
             if (processedMobiles.has(mobile1)) {
                 console.log(`Notification already sent for mobile number: ${mobile1}`);
@@ -515,6 +516,7 @@ async function emiTomorrowPN() {
 
             if (tokens.has(mobile1)) {
                 const tokenToNotify = tokens.get(mobile1);
+                //console.log("Token",tokenToNotify)
                 const notificationData = {
                     title: `Upcoming EMI for Loan ${emi.tomorrowEmiDue['loan id']}`,
                     body: `Tomorrow is the last date for EMI Amount ₹${emi.tomorrowEmiDue['amount']}.`,
